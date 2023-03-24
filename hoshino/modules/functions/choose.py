@@ -24,13 +24,13 @@ async def bangzhu_choose(bot, ev):
 @sv.on_prefix(('要'))
 async def hp_choose(bot, ev):
     message = ev.message.extract_plain_text().strip()
-    msg = message[0:].split('还是')
+    msg = message[:].split('还是')
     if len(msg) == 1:
         return
     choices=list(filter(lambda x:len(x)!=0,msg))
     if not choices:
         await bot.send(ev,'选项不能全为空！',at_sender=True)
-        return 
+        return
     msgs=['建议您选择: ']
     if random.randrange(1000)<=100:
         msgs.append('“我全都要”')

@@ -41,21 +41,18 @@ def CQ_trans(cqcode:str) -> str:
     CQcode = CQcode.replace('&#44;',',')
     CQcode = CQcode.replace('&amp;','&')
     CQcode = CQcode.replace('&#91;','[')
-    CQcode = CQcode.replace('&#93;',']')
-    return CQcode
+    return CQcode.replace('&#93;',']')
 
 def CQ_detrans(cqcode:str) -> str:
     CQcode = cqcode
     CQcode = CQcode.replace('&','&amp;')
     CQcode = CQcode.replace('[','&#91;')
-    CQcode = CQcode.replace(']','&#93;')
-    return CQcode
+    return CQcode.replace(']','&#93;')
 
 @sv.on_command('echo', aliases=('回响'), only_to_me=False)
 async def echo(session: CommandSession):
     CQcode = session.get('CQcode', prompt="你想回响什么呢?")
-    res = CQ_trans(CQcode)
-    if res:
+    if res := CQ_trans(CQcode):
         await session.send(res)
     else:
         await session.send("[ERROR]Not found translate_Info")
@@ -65,8 +62,7 @@ async def echo(session: CommandSession):
 @sv.on_command('parse', aliases=('解析'), only_to_me=False)
 async def parse(session: CommandSession):
     CQcode = session.get('CQcode', prompt="你想解析什么呢?")
-    res = CQ_detrans(CQcode)
-    if res:
+    if res := CQ_detrans(CQcode):
         await session.send(res)
     else:
         await session.send("[ERROR]Not found translate_Info")

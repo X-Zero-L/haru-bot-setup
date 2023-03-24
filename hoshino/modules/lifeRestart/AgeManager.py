@@ -27,13 +27,11 @@ class AgeManager:
     
     def getEvents(self) -> List[WeightedEvent]:
         now = self._getnow()
-        if 'event' in now: return now['event']
-        return []
+        return now['event'] if 'event' in now else []
     
     def getTalents(self) -> List[Talent]:
         now = self._getnow()
-        if 'talent' in now: return now['talent']
-        return []
+        return now['talent'] if 'talent' in now else []
     
     def grow(self):
         self._base.property.AGE += 1

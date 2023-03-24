@@ -40,7 +40,7 @@ def get_data():
                 hoshino.logger.error(f'读取发病小作文时发生错误{type(e)}')
                 return None
     else:
-        hoshino.logger.error(f'目录下未找到发病小作文')
+        hoshino.logger.error('目录下未找到发病小作文')
     return random.choice(words)
 
 @sv.on_fullmatch(('asill帮助','发病帮助','小作文帮助','帮助发病','小作文发病'))
@@ -52,12 +52,12 @@ async def xzw(bot,ev:CQEvent):
     gid = ev.group_id
     illness = get_data()
     uid = ev['user_id']
-    if not uid in hoshino.config.SUPERUSERS:
+    if uid not in hoshino.config.SUPERUSERS:
         if not _flmt.check(uid):
             await bot.send(ev, f"┭┮﹏┭┮呜哇~频繁使用的话bot会宕机的...再等{_cd}秒吧", at_sender=True)
             return
         if not _nlmt.check(uid):
-            await bot.send(ev, f"避免重复使用导致刷屏，此消息已忽略")
+            await bot.send(ev, "避免重复使用导致刷屏，此消息已忽略")
             return
     _flmt.start_cd(uid)
     _nlmt.increase(uid)
@@ -67,12 +67,12 @@ async def xzw(bot,ev:CQEvent):
 async def fb(bot, ev: CQEvent):
     aim = str(ev.message).strip()
     uid = ev['user_id']
-    if not uid in hoshino.config.SUPERUSERS:
+    if uid not in hoshino.config.SUPERUSERS:
         if not _flmt.check(uid):
             await bot.send(ev, f"┭┮﹏┭┮呜哇~频繁使用的话bot会宕机的...再等{_cd}秒吧", at_sender=True)
             return
         if not _nlmt.check(uid):
-            await bot.send(ev, f"避免重复使用导致刷屏，此消息已忽略")
+            await bot.send(ev, "避免重复使用导致刷屏，此消息已忽略")
             return
     if not aim:
         await bot.send(ev, "请发送[发病 对象]~", at_sender=True)
@@ -111,7 +111,7 @@ async def bqjz(bot, ev: CQEvent):
                     hoshino.logger.error(f'添加发病小作文时发生错误{type(e)}')
                     return None
         else:
-            hoshino.logger.error(f'目录下未找到发病小作文')
+            hoshino.logger.error('目录下未找到发病小作文')
 
 
 async def check(bot, ev: CQEvent, text):

@@ -57,11 +57,7 @@ async def load_event_cn():
             for item in data['list']:
                 # 20 活动公告 21 游戏公告
                 if item['type'] != 20:
-                    ignore = False
-                    for ann_id in ignored_ann_ids:
-                        if ann_id == item["ann_id"]:
-                            ignore = True
-                            break
+                    ignore = any(ann_id == item["ann_id"] for ann_id in ignored_ann_ids)
                     if ignore:
                         continue
 
@@ -91,9 +87,7 @@ async def load_event_cn():
 
 
 async def load_event(server):
-    if server == 'cn':
-        return await load_event_cn()
-    return 1
+    return await load_event_cn() if server == 'cn' else 1
 
 
 def get_pcr_now(offset):
@@ -117,9 +111,8 @@ async def get_events(server, offset, days):
     await lock[server].acquire()
     try:
         t = pcr_now.strftime('%y%m%d')
-        if event_updated[server] != t:
-            if await load_event(server) == 0:
-                event_updated[server] = t
+        if event_updated[server] != t and await load_event(server) == 0:
+            event_updated[server] = t
     finally:
         lock[server].release()
 

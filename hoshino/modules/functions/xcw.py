@@ -34,8 +34,7 @@ xcw_folder_mawo = R.get('record/mawo/').path
 def get_xcw_mawo():  #get
     files = os.listdir(xcw_folder_mawo)  #folder
     filename = random.choice(files)
-    rec = R.get('record/mawo/', filename)  #folder
-    return rec
+    return R.get('record/mawo/', filename)
 
 
 ######开始发送

@@ -30,7 +30,7 @@ async def bangzhu_twitter(bot, ev):
 
 def load_config():
     try:
-        config_path = hoshino_path + 'twitter_config.json'
+        config_path = f'{hoshino_path}twitter_config.json'
         if os.path.exists(config_path):
             with open(config_path, 'r', encoding='utf8') as config_file:
                 return json.load(config_file)
@@ -41,7 +41,7 @@ def load_config():
 
 def save_config(config):
     try:
-        with open(hoshino_path + 'twitter_config.json', 'w', encoding='utf8') as config_file:
+        with open(f'{hoshino_path}twitter_config.json', 'w', encoding='utf8') as config_file:
             json.dump(config, config_file, ensure_ascii=False, indent=4)
         return True
     except:
@@ -75,17 +75,13 @@ async def handle_RssAdd(bot, ev: CQEvent):
     config = load_config()
     gid = str(ev.group_id)
     if url in config.keys():
-        gidList = []
-        for item in config[url]:
-            gidList.append(item[0])
+        gidList = [item[0] for item in config[url]]
         if gid not in gidList:
             config[url].append([gid,name])
         else:
             await bot.finish(ev, '此群已经添加过该订阅，请勿重复添加')
     else:
-        config[url] = []
-        config[url].append([gid,name])
-    
+        config[url] = [[gid, name]]
     if save_config(config):
         await bot.send(ev, f'添加订阅"{s}"成功!')
         # 重新加载缓存
@@ -116,15 +112,12 @@ async def handle_RssDel(bot, ev: CQEvent):
 async def handle_RssLook(bot, ev: CQEvent):
     config = load_config()
     gid = str(ev.group_id)
-    msg = '' 
+    msg = ''
     for url in config.keys():
         for item in config[url]:
             if item[0] == gid:
                 msg = msg + '\n' + item[1] + ': ' + url
-    if msg == '':
-        msg = '此群还未添加twitter订阅'
-    else:
-        msg = 'twitter爬虫已开启!\n此群设置的订阅为:'  + msg
+    msg = '此群还未添加twitter订阅' if msg == '' else 'twitter爬虫已开启!\n此群设置的订阅为:'  + msg
     await bot.send(ev, msg)
 
 @sv.scheduled_job('interval',minutes=5)
@@ -132,10 +125,7 @@ async def twitter_search_spider():
     bot = hoshino.get_bot()
     config = load_config()
     for url in config.keys():
-        gid = []
-        for item in config[url]:
-            gid.append(item[0])
-        if gid:
+        if gid := [item[0] for item in config[url]]:
             rss = RSS_class.rss()
             rss.url = url
             rss.gid = gid

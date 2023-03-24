@@ -9,11 +9,7 @@ class DummyList(list):
         super().__init__(list)
 
     def __contains__(self, o: object) -> bool:
-        if type(o) is set:
-            for x in self:
-                if x in o: return True
-            return False
-        return super().__contains__(o)
+        return any(x in o for x in self) if type(o) is set else super().__contains__(o)
 def parseCondition(cond: str):
     cond2 = _regattr.sub(lambda m: f'getattr(x, "{m.group()}")', cond).replace('?[', ' in DummyList([').replace('![', 'not in DummyList([').replace(']', '])')
     while True:

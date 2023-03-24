@@ -62,7 +62,7 @@ for json_name in JSON_LIST:
     with open(os.path.join(FILE_PATH, f"{json_name}.json"), 'r', encoding='UTF-8') as f:
         data = json.load(f)
         GOD_EYE_TOTAL[json_name] = len(data)
-        GOD_EYE_INFO.update(data)
+        GOD_EYE_INFO |= data
         GOD_EYE_CLASS_LIST.setdefault(json_name,list(data.keys()))
 
 
@@ -127,7 +127,7 @@ class God_eye_position_image(object):
         self.paste()
         bio = BytesIO()
         self.map_image.save(bio, format='JPEG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
 
         return f"[CQ:image,file={base64_str}]"
 
@@ -180,7 +180,7 @@ class God_eye_map(object):
             self.map_image.paste(self.resource_icon,(x - 50 , y - 120),self.resource_icon)
 
             draw = ImageDraw.Draw(self.map_image)
-            setfont = ImageFont.truetype(FILE_PATH + '/Minimal.ttf', size=50)
+            setfont = ImageFont.truetype(f'{FILE_PATH}/Minimal.ttf', size=50)
 
             draw.text((x + 40, y - 60), str(id), fill="#000000", font=setfont)
 
@@ -222,7 +222,7 @@ class God_eye_map(object):
 
         bio = BytesIO()
         self.map_image.save(bio, format='JPEG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
 
         return f"[CQ:image,file={base64_str}]"
 
@@ -242,11 +242,8 @@ def get_uid_number_found(uid:str):
 def get_eye_gif_path(eye_id):
     # 获取gif的路径，找不到会返回空字符串
     eye_type = GOD_EYE_INFO[eye_id]["属性"]
-    gif_path = os.path.join(FILE_PATH,"icon",eye_type,str(eye_id) + ".gif")
-    if os.path.exists(gif_path):
-        return gif_path
-    else:
-        return ""
+    gif_path = os.path.join(FILE_PATH, "icon", eye_type, f"{str(eye_id)}.gif")
+    return gif_path if os.path.exists(gif_path) else ""
 
 
 def get_eye_gif_cq_code(eye_id):
@@ -256,8 +253,7 @@ def get_eye_gif_cq_code(eye_id):
         return ""
 
     gif_path = gif_path.replace("\\","/")
-    cq_code = f'[CQ:image,file=file://{gif_path}]'
-    return cq_code
+    return f'[CQ:image,file=file://{gif_path}]'
 
 def get_eye_remarks(eye_id):
     # 获取神瞳的备注，注意有的神瞳备注是空字符串
@@ -271,10 +267,10 @@ def add_god_eye_info(uid,eye_id):
 
 def init_uid_info(uid):
     # 初始化用户的信息
-    if not (uid in uid_info):
+    if uid not in uid_info:
         uid_info.setdefault(uid, {})
     for eye_type in JSON_LIST:
-        if not (eye_type in uid_info[uid]):
+        if eye_type not in uid_info[uid]:
             uid_info[uid].setdefault(eye_type, [])
 
 def get_random_god_eye_id(uid,eye_type):
@@ -294,7 +290,7 @@ def get_random_god_eye_id(uid,eye_type):
 
 def delete_god_eye_info(uid,eye_id):
     eye_type = GOD_EYE_INFO[eye_id]["属性"]
-    if not (eye_id in uid_info[uid][eye_type]):
+    if eye_id not in uid_info[uid][eye_type]:
         return "你还没有找到这个神瞳！"
 
     uid_info[uid][eye_type].remove(eye_id)
@@ -312,13 +308,11 @@ def get_god_eye_message(eye_id):
     message += God_eye_position_image(eye_id).get_cq_code() # 获取神瞳位置图
     message += "\n"
 
-    gif_cq_code = get_eye_gif_cq_code(eye_id) # 获取找神瞳的动图，没有找到这就是个空字符串
-    if gif_cq_code:
+    if gif_cq_code := get_eye_gif_cq_code(eye_id):
         message += gif_cq_code
         message += "\n"
 
-    remarks_txt = get_eye_remarks(eye_id) # 获取神瞳的备注信息
-    if remarks_txt:
+    if remarks_txt := get_eye_remarks(eye_id):
         message += "备注："
         message += remarks_txt
         message += "\n"

@@ -65,10 +65,10 @@ winner_judger = WinnerJudger()
 
 async def get_user_card_dict(bot, group_id):
     mlist = await bot.get_group_member_list(group_id=group_id)
-    d = {}
-    for m in mlist:
-        d[m['user_id']] = m['card'] if m['card'] != '' else m['nickname']
-    return d
+    return {
+        m['user_id']: m['card'] if m['card'] != '' else m['nickname']
+        for m in mlist
+    }
 
 
 def uid2card(uid, user_card_dict):
@@ -140,19 +140,21 @@ async def on_input_chara_name(bot, ev: CQEvent):
                     card =  info['card']
                     nickname =  info['nickname']
                     s = card
-                    if card == '' :
+                    if s == '':
                         s = nickname
-                    #await bot.send(ev, f'at解析为{s}')
-                    break
                 else:
                     s = ev.message.extract_plain_text()
-                    break
+                #await bot.send(ev, f'at解析为{s}')
+                break
             cid = winner_judger.get_correct_chara_id(ev.group_id)
             info = await bot.get_group_member_info(self_id=ev.self_id, group_id=ev.group_id, user_id=cid)
             card =  info['card']
             nickname =  info['nickname']
             #await bot.send(ev, f'匹配对象{s}，匹配目标{card}、{nickname}')
-            if (s == card or s == nickname) and winner_judger.get_winner(ev.group_id) == '':
+            if (
+                s in [card, nickname]
+                and winner_judger.get_winner(ev.group_id) == ''
+            ):
                 winner_judger.record_winner(ev.group_id, ev.user_id)
                 winnerinfo = await bot.get_group_member_info(self_id=ev.self_id, group_id=ev.group_id, user_id=ev.user_id)
                 winnercard =  winnerinfo['card']

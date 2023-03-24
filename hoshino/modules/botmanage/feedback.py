@@ -31,10 +31,9 @@ async def feedback(bot, ev: CQEvent):
     if not lmt.check(uid):
         await bot.finish(ev, EXCEED_NOTICE, at_sender=True)
     coffee = hoshino.config.SUPERUSERS[0]
-    text = str(ev.message).strip()
-    if not text:
-        await bot.send(ev, "请发送来杯咖啡+您要反馈的内容~", at_sender=True)
-    else:
+    if text := str(ev.message).strip():
         await bot.send_private_msg(self_id=ev.self_id, user_id=coffee, message=f'收到来自群{ev.group_id}的消息，发送者Q{uid}\n{text}')
         await bot.send(ev, f'您的反馈已发送至维护组！\n======\n{text}', at_sender=True)
         lmt.increase(uid)
+    else:
+        await bot.send(ev, "请发送来杯咖啡+您要反馈的内容~", at_sender=True)

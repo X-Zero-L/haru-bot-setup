@@ -80,7 +80,9 @@ async def bangqu(bot, ev):
             'win':'0'
         }
         save_binds()
-    await bot.finish(ev, '\n角色：{}\n大区：{}\n绑定成功！'.format(get_name,get_region), at_sender=True)
+    await bot.finish(
+        ev, f'\n角色：{get_name}\n大区：{get_region}\n绑定成功！', at_sender=True
+    )
     
 
 @sv.on_prefix(('查询300角色'))
@@ -110,7 +112,7 @@ async def change_arena_sub(bot, ev):
     key = 'push_on'
     uid = str(ev['user_id'])
     async with lck:
-        if not uid in binds:
+        if uid not in binds:
             await bot.send(ev,'您还未绑定角色',at_sender=True)
         else:
             binds[uid][key] = ev['match'].group(1) == '启用'
@@ -129,7 +131,7 @@ async def delete_arena_sub(bot,ev):
         uid = str(ev.message[0].data['qq'])
     elif len(ev.message) == 1 and ev.message[0].type == 'text' and not ev.message[0].data['text']:
         uid = str(ev['user_id'])
-    if not uid in binds:
+    if uid not in binds:
         await bot.finish(ev, '未绑定角色', at_sender=True)
         return
     async with lck:
@@ -142,17 +144,17 @@ async def delete_arena_sub(bot,ev):
 async def send_arena_sub_status(bot,ev):
     global binds, lck
     uid = str(ev['user_id'])
-    if not uid in binds:
+    if uid not in binds:
         await bot.send(ev,'您还未绑定角色', at_sender=True)
     else:
         info = binds[uid]
         state=info['state']
-        if state=='on':
-            msg='出租中'
-        if state=='off':
+        if state == 'off':
             msg='待租'
-        await bot.finish(ev,
-    f'''
+        elif state == 'on':
+            msg='出租中'
+            await bot.finish(ev,
+        f'''
 当前绑定信息：
 角色：{info['id']}
 大区：{info['Region']}
@@ -161,29 +163,29 @@ async def send_arena_sub_status(bot,ev):
 
 @sv.on_prefix(('查胜场'))
 async def shengchang(bot, ev):
-    uid = str(ev['user_id'])
     try:
         id1 = str(ev.message[0].data['qq'])
     except:
         id1 = str(ev.user_id)
 
-    if not id1 in binds and id1==uid:
-        await bot.finish(ev, '您未绑定角色', at_sender=True)
+    if id1 not in binds:
+        uid = str(ev['user_id'])
+        if id1 == uid:
+            await bot.finish(ev, '您未绑定角色', at_sender=True)
+        else:
+            await bot.finish(ev, '目标未绑定角色', at_sender=True)
         return
 
-    elif not id1 in binds and id1!=uid:
-        await bot.finish(ev, '目标未绑定角色', at_sender=True)
-        return
     try:
         now_time=time.strftime('%Y-%m-%d')
         info = binds[id1]
         key=info['id']
-        url='http://300.electricdog.net/300hero/{}'.format(quote(key))
+        url = f'http://300.electricdog.net/300hero/{quote(key)}'
         data=await getjson(url)
         data1=data.get("data")
         last=data1.get("zcLastMatchTime")
         mat = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",last)
-        last_time=mat.group(0)
+        last_time = mat[0]
         if last_time != now_time:
             msg='\n该用户今日未曾进行游戏'
         else:
@@ -199,43 +201,39 @@ async def shengchang(bot, ev):
 
 @sv.on_prefix(('查出租'))
 async def chuzu(bot, ev):
-    uid = str(ev['user_id'])
     try:
         id1 = str(ev.message[0].data['qq'])
     except:
         id1 = str(ev.user_id)
 
-    if not id1 in binds and id1==uid:
-        await bot.finish(ev, '您未绑定角色', at_sender=True)
+    if id1 not in binds:
+        uid = str(ev['user_id'])
+        if id1 == uid:
+            await bot.finish(ev, '您未绑定角色', at_sender=True)
+        else:
+            await bot.finish(ev, '目标未绑定角色', at_sender=True)
         return
 
-    elif not id1 in binds and id1!=uid:
-        await bot.finish(ev, '目标未绑定角色', at_sender=True)
-        return
     info = binds[id1]
     key=info['Region']
     ID=info['id']
-    if key in daqu:
-        qu='电信区'
-    else:
-        qu='网通区'
-    url='http://api.300mbdl.cn/%E6%8E%A5%E5%8F%A32/%E7%A7%9F%E5%8F%B7/%E7%A7%9F%E5%8F%B7%E5%A4%A7%E5%8E%85?%E9%A1%B5=1&%E9%A1%B5%E9%95%BF=10&%E5%87%BA%E7%A7%9F%E4%B8%AD=true&&%E5%B7%B2%E9%80%89%E5%8C%BA%E6%9C%8D={}%2F{}'.format(quote(qu),quote(key))
+    qu = '电信区' if key in daqu else '网通区'
+    url = f'http://api.300mbdl.cn/%E6%8E%A5%E5%8F%A32/%E7%A7%9F%E5%8F%B7/%E7%A7%9F%E5%8F%B7%E5%A4%A7%E5%8E%85?%E9%A1%B5=1&%E9%A1%B5%E9%95%BF=10&%E5%87%BA%E7%A7%9F%E4%B8%AD=true&&%E5%B7%B2%E9%80%89%E5%8C%BA%E6%9C%8D={quote(qu)}%2F{quote(key)}'
     try:
         now_time=time.strftime('%Y-%m-%d')
-        url1='http://300.electricdog.net/300hero/{}'.format(quote(ID))
+        url1 = f'http://300.electricdog.net/300hero/{quote(ID)}'
         surl=await getjson(url1)
         surl1=surl.get("data")
         last=surl1.get("zcLastMatchTime")
         mat = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",last)
-        last_time=mat.group(0)
+        last_time = mat[0]
         if last_time != now_time:
             binds[id1]['win']='0'
-            save_binds()
         else:
             surl2=surl1.get("zcWin")
             surl3=str(surl2)
             binds[id1]['win']=surl3
-            save_binds()
+        save_binds()
         true_url=await getjson(url)
         total=true_url.get("total")
         if total==0:
@@ -259,9 +257,9 @@ async def chuzu(bot, ev):
             else:
                 now=0
         if now==1:
-            msg='\n用户名:{}\n目前状态:{}\n出租时间:{}\n当前胜场:{}'.format(ID,zhuangtai,shijian,binds[id1]['win'])
+            msg = f"\n用户名:{ID}\n目前状态:{zhuangtai}\n出租时间:{shijian}\n当前胜场:{binds[id1]['win']}"
         else:
-            msg='\n用户名:{}\n目前状态:待租\n当前胜场:{}'.format(ID,binds[id1]['win'])
+            msg = f"\n用户名:{ID}\n目前状态:待租\n当前胜场:{binds[id1]['win']}"
     except Exception as e:
         print(e)
         msg='\n查询出错'
@@ -287,83 +285,83 @@ async def chuzu_schedule():
         bind_cache = deepcopy(binds)
     for user in bind_cache:
         info = bind_cache[user]
-        key=info['Region']
-        ID=info['id']
-        uid=info['uid']
-        gid=info['gid']
         push_on=info['push_on']
         if push_on ==False:
             continue
-        else:
-            if key in daqu:
-                qu='电信区'
-            else:
-                qu='网通区'
-            url='http://api.300mbdl.cn/%E6%8E%A5%E5%8F%A32/%E7%A7%9F%E5%8F%B7/%E7%A7%9F%E5%8F%B7%E5%A4%A7%E5%8E%85?%E9%A1%B5=1&%E9%A1%B5%E9%95%BF=10&%E5%87%BA%E7%A7%9F%E4%B8%AD=true&&%E5%B7%B2%E9%80%89%E5%8C%BA%E6%9C%8D={}%2F{}'.format(quote(qu),quote(key))
+        key=info['Region']
+        qu = '电信区' if key in daqu else '网通区'
+        url = f'http://api.300mbdl.cn/%E6%8E%A5%E5%8F%A32/%E7%A7%9F%E5%8F%B7/%E7%A7%9F%E5%8F%B7%E5%A4%A7%E5%8E%85?%E9%A1%B5=1&%E9%A1%B5%E9%95%BF=10&%E5%87%BA%E7%A7%9F%E4%B8%AD=true&&%E5%B7%B2%E9%80%89%E5%8C%BA%E6%9C%8D={quote(qu)}%2F{quote(key)}'
+        ID=info['id']
+        uid=info['uid']
+        gid=info['gid']
+        try:
+            sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
             try:
-                sv.logger.info(f'querying {info["id"]} for {info["uid"]}')
-                try:
-                    now_time=time.strftime('%Y-%m-%d')
-                    url1='http://300.electricdog.net/300hero/{}'.format(quote(ID))
-                    surl=await getjson(url1)
-                    surl1=surl.get("data")
-                    last=surl1.get("zcLastMatchTime")
-                    mat = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",last)
-                    last_time=mat.group(0)
-                    if last_time != now_time:
-                        binds[uid]['win']='0'
-                        save_binds()
-                    else:
-                        surl2=surl1.get("zcWin")
-                        surl3=str(surl2)
-                        binds[uid]['win']=surl3
-                        save_binds()
-                except Exception as e:
-                    print(e)
-                wint=binds[uid]['win']
-                swint=int(wint)
-                res = info['state']
-                true_url=await getjson(url)
-                total=true_url.get("total")
-                if total==0:
-                    now=0
+                now_time=time.strftime('%Y-%m-%d')
+                url1 = f'http://300.electricdog.net/300hero/{quote(ID)}'
+                surl=await getjson(url1)
+                surl1=surl.get("data")
+                last=surl1.get("zcLastMatchTime")
+                mat = re.search(r"(\d{4}-\d{1,2}-\d{1,2})",last)
+                last_time = mat[0]
+                if last_time != now_time:
+                    binds[uid]['win']='0'
                 else:
-                    data=true_url.get("data")
-                    cun=[]
-                    for cz in data:
-                        pd=cz.values()
-                        if ID not in pd:
-                            cun.append('false')
-                        else:
-                            cun.append('true')
-                    if 'true' in cun:
-                        for ces in data:
-                            get_id=ces.get('F角色名')
-                            if get_id ==ID:
-                                now=1
-                                print(now)
-                                zhuangtai=ces.get('F状态')
-                                shijian=ces.get('F订单时间')
-                    else:
-                        now=0
-                if now==1:
-                    if res=='off' or swint>=49:
-                        gb='on'
-                        binds[uid]['state']=gb
-                        save_binds()
-                        if swint >=49:
-                            tixing='\n\n目前角色胜场已大于49吧，请及时下架！'
-                        else:
-                            tixing=''
-                        await bot.send_group_msg(
-                            group_id = int(gid),
-                            message = f'[CQ:at,qq={uid}]\n用户名：{ID}\n出租状态：{zhuangtai}\n出租时间：{shijian}\n当前胜场：{wint}'+tixing
-                    )
-                else:
-                    gb='off'
-                    binds[uid]['state']=gb
-                    save_binds()
+                    surl2=surl1.get("zcWin")
+                    surl3=str(surl2)
+                    binds[uid]['win']=surl3
+                save_binds()
             except Exception as e:
                 print(e)
+            wint=binds[uid]['win']
+            true_url=await getjson(url)
+            total=true_url.get("total")
+            if total==0:
+                now=0
+            else:
+                data=true_url.get("data")
+                cun=[]
+                for cz in data:
+                    pd=cz.values()
+                    if ID not in pd:
+                        cun.append('false')
+                    else:
+                        cun.append('true')
+                if 'true' in cun:
+                    for ces in data:
+                        get_id=ces.get('F角色名')
+                        if get_id ==ID:
+                            now=1
+                            print(now)
+                            zhuangtai=ces.get('F状态')
+                            shijian=ces.get('F订单时间')
+                else:
+                    now=0
+            if now==1:
+                swint=int(wint)
+                res = info['state']
+                if res=='off':
+                    binds[uid]['state'] = 'on'
+                    save_binds()
+                    tixing = '\n\n目前角色胜场已大于49吧，请及时下架！' if swint >=49 else ''
+                    await bot.send_group_msg(
+                        group_id=int(gid),
+                        message=f'[CQ:at,qq={uid}]\n用户名：{ID}\n出租状态：{zhuangtai}\n出租时间：{shijian}\n当前胜场：{wint}{tixing}',
+                    )
+                elif swint>=49:
+                    gb='on'
+                    binds[uid]['state']=gb
+                    save_binds()
+                    tixing='\n\n目前角色胜场已大于49吧，请及时下架！'
+                    await bot.send_group_msg(
+                        group_id=int(gid),
+                        message=f'[CQ:at,qq={uid}]\n用户名：{ID}\n出租状态：{zhuangtai}\n出租时间：{shijian}\n当前胜场：{wint}{tixing}',
+                    )
+            else:
+                gb='off'
+                binds[uid]['state']=gb
+                save_binds()
+        except Exception as e:
+            print(e)
 
                 

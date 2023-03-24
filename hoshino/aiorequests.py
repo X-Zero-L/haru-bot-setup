@@ -40,7 +40,7 @@ class AsyncResponse:
         return self.raw_response.cookies
 
     def __repr__(self):
-        return '<AsyncResponse [%s]>' % self.raw_response.status_code
+        return f'<AsyncResponse [{self.raw_response.status_code}]>'
 
     def __bool__(self):
         return self.ok

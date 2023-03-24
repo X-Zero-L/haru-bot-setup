@@ -25,12 +25,12 @@ chinese = {"0":"","1":"一","2":"二","3":"三","4":"四","5":"五","6":"六","7
 def month_to_chinese(month:str):
     # 把日期数字转成中文数字
     m = int(month)
-    if m < 10 :
+    if m < 10:
         return chinese[month[-1]]
-    elif m < 20 :
-        return "十" + chinese[month[-1]]
+    elif m < 20:
+        return f"十{chinese[month[-1]]}"
     else:
-        return chinese[month[0]] + "十" + chinese[month[-1]]
+        return f"{chinese[month[0]]}十{chinese[month[-1]]}"
 
 
 def load_data():
@@ -46,7 +46,7 @@ load_data()
 
 def seed_random_list(seed:str,l:list):
     # 使用随机种子随机选择列表中的元素，相同的种子和列表将返回同样的输出
-    seed = seed + str(l)
+    seed += str(l)
     random.seed(seed)
     index = random.random() * len(l)
     return l[int(index)]
@@ -107,7 +107,7 @@ def generate_almanac():
     base64_str = base64.b64encode(bio.getvalue()).decode()
 
     almanac_data["date"] = time.strftime("%Y-%m-%d")
-    almanac_data["almanac_base64_str"] = 'base64://' + base64_str
+    almanac_data["almanac_base64_str"] = f'base64://{base64_str}'
 
 
 def get_almanac_base64_str():

@@ -62,7 +62,7 @@ def genBaseImage(width=1500, height=500):
 
     k=0.63   #渐变色缩放系数，不应大于1
     c=0.53    #渐变色中心位置
-    
+
     downerSilverArray = createLinearGradient({
         0: rgb(0, 15, 36),
         0.10: rgb(255, 255, 255),
@@ -75,7 +75,7 @@ def genBaseImage(width=1500, height=500):
         0.95: rgb(166, 175, 194),
         1: rgb(50, 50, 50)
     }, width=width, height=height, size=k, center=c)
-    
+
     goldArray = createLinearGradient({
         0: rgb(253, 241, 0),
         0.25: rgb(245, 253, 187),
@@ -84,21 +84,21 @@ def genBaseImage(width=1500, height=500):
         0.9: rgb(127, 53, 0),
         1: rgb(243, 196, 11)
     }, width=width, height=height, size=k, center=c)
-    
+
     strokeRedArray = createLinearGradient({
         0: rgb(255, 100, 0),
         0.5: rgb(123, 0, 0),
         0.51: rgb(240, 0, 0),
         1: rgb(5, 0, 0)
     }, width=width, height=height, size=k, center=c)
-    
+
     redArray = createLinearGradient({
         0: rgb(230, 0, 0),
         0.5: rgb(123, 0, 0),
         0.51: rgb(240, 0, 0),
         1: rgb(5, 0, 0)
     }, width=width, height=height, size=k, center=c)
-    
+
     silver2Array = createLinearGradient({
         0: rgb(245, 246, 248),
         0.15: rgb(255, 255, 255),
@@ -108,7 +108,7 @@ def genBaseImage(width=1500, height=500):
         0.52: rgb(196, 215, 222),
         1.0: rgb(255, 255, 255)
     }, width=width, height=height, size=k, center=c)
-    
+
     navyArray = createLinearGradient({
         0: rgb(16, 25, 58),
         0.03: rgb(255, 255, 255),
@@ -116,7 +116,7 @@ def genBaseImage(width=1500, height=500):
         0.2: rgb(16, 25, 58),
         1: rgb(16, 25, 58)
     }, width=width, height=height, size=k, center=c)
-    
+
     result = {
         "downerSilver": Image.fromarray(np.uint8(downerSilverArray)).crop((0, 0, width, height)),
         "gold": Image.fromarray(np.uint8(goldArray)).crop((0, 0, width, height)),
@@ -129,8 +129,8 @@ def genBaseImage(width=1500, height=500):
         "strokeWhite": Image.new("RGBA", (width, height), rgb(221, 221, 221)).crop((0, 0, width, height)),  # Width: 8
         "baseStrokeWhite": Image.new("RGBA", (width, height), rgb(255, 255, 255)).crop((0, 0, width, height))  # Width: 8
     }
-    for k in result.keys():
-        result[k].putalpha(255)
+    for v in result.values():
+        v.putalpha(255)
     return result
 
 
@@ -169,7 +169,7 @@ def genImage(word_a="5000兆円", word_b="欲しい!", default_width=1500, heigh
     # Prepare mask - Upper
     upper_mask_base = Image.new("L", (upper_width+leftmargin, _round(height/2)+ upmargin), 0)
 
-    mask_img_upper = list()
+    mask_img_upper = []
     upper_data = [
         [
             (4, 4), (4, 4), (0, 0), (0, 0), (2, -3), (0, -3), (0, -3), (0, -3)
@@ -194,11 +194,11 @@ def genImage(word_a="5000兆円", word_b="欲しい!", default_width=1500, heigh
         mask_draw_upper.text((pos[0]+leftmargin, pos[1]+ upmargin), word_a,
                              font=font_upper, fill=255,
                              stroke_width=_round(stroke*height/500))
-        
+
 
     # Prepare mask - Downer
     downer_mask_base = Image.new("L", (downer_width+leftmargin, _round(height/2)+ upmargin), 0)
-    mask_img_downer = list()
+    mask_img_downer = []
     downer_data = [
         [
             (5, 2), (5, 2), (0, 0), (0, 0), (0, 0), (0, -3)
@@ -238,7 +238,7 @@ def genImage(word_a="5000兆円", word_b="欲しい!", default_width=1500, heigh
     #img_upper.save("./uptemp.png")
     #img_downer.save("./downtemp.png")
     # tilt image
-    tiltres = list()
+    tiltres = []
     angle = 20
     for img in [img_upper, img_downer]:
         dist = img.height * tan(radians(angle))

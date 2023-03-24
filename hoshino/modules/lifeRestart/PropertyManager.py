@@ -116,7 +116,7 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "颜值:  " + str(self.CHR)+"  "+judge+"\n"
+        summary = f"{summary}颜值:  {str(self.CHR)}  {judge}" + "\n"
 
         judge = '地狱'
         for res in sum_data['INT']:
@@ -124,7 +124,7 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "智力:  " + str(self.INT)+"  "+judge+"\n"
+        summary = f"{summary}智力:  {str(self.INT)}  {judge}" + "\n"
 
         judge = '地狱'
         for res in sum_data['STR']:
@@ -132,7 +132,7 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "体质:  " + str(self.STR)+"  "+judge+"\n"
+        summary = f"{summary}体质:  {str(self.STR)}  {judge}" + "\n"
 
         judge = '地狱'
         for res in sum_data['MNY']:
@@ -140,7 +140,7 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "家境:  " + str(self.MNY)+"  "+judge+"\n"
+        summary = f"{summary}家境:  {str(self.MNY)}  {judge}" + "\n"
 
         judge = '地狱'
         for res in sum_data['SPR']:
@@ -148,7 +148,7 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "快乐:  " + str(self.SPR)+"  "+judge+"\n"
+        summary = f"{summary}快乐:  {str(self.SPR)}  {judge}" + "\n"
 
         judge = '胎死腹中'
         for res in sum_data['AGE']:
@@ -156,9 +156,9 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "享年:  " + str(self.AGE)+"  "+judge+"\n"
+        summary = f"{summary}享年:  {str(self.AGE)}  {judge}" + "\n"
 
-        summary = summary + '\n'
+        summary += '\n'
 
         judge = '地狱'
         sum = int((self.CHR+self.INT+self.STR+self.MNY+self.SPR)*2+self.AGE/2)
@@ -167,6 +167,4 @@ class PropertyManager:
                 judge = res["judge"]
             else:
                 break
-        summary = summary + "总评:  " + str(sum) + "  " + judge + "\n"
-
-        return summary
+        return f"{summary}总评:  {sum}  {judge}" + "\n"

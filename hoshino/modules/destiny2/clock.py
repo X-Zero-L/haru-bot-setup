@@ -22,14 +22,7 @@ def get_time():
     ts = r.getheader('date')
     ltime = time.strptime(ts[5:25], "%d %b %Y %H:%M:%S")
     ttime = time.localtime(time.mktime(ltime)+8*60*60)
-    dat = datetime.date(ttime.tm_year,ttime.tm_mon,ttime.tm_mday)
-    # 下方用于测试用
-    # global testtime
-    # test1 = "%u-%02u-%02u"%(ttime.tm_year,ttime.tm_mon,ttime.tm_mday)
-    # test2 = "%02u:%02u:%02u"%(ttime.tm_hour,ttime.tm_min,ttime.tm_sec)
-    # currenttime=test1+" "+test2
-    # testtime = str(currenttime)
-    return dat
+    return datetime.date(ttime.tm_year,ttime.tm_mon,ttime.tm_mday)
 
 def get_week_day(date):
     week_day = {
@@ -94,13 +87,14 @@ async def zhoubaoreminder():
         imgdata = base64.b64decode(ls_f)
         save_dir = R.img('destiny2').path
         path_dir = os.path.join(save_dir,'zhoubao.jpg')
-        file = open(path_dir,'wb')
-        file.write(imgdata)
-        file.close()
-        pzhoubao = ' '.join(map(str, [
-            R.img(f'destiny2/zhoubao.jpg').cqcode,
-        ]))
-        msg = '今天是' + get_week_day(get_time()) + '\n周报已更新\n' + f'命运2 周报：\n图片作者：seanalpha\n{pzhoubao}'
+        with open(path_dir,'wb') as file:
+            file.write(imgdata)
+        pzhoubao = ' '.join(map(str, [R.img('destiny2/zhoubao.jpg').cqcode]))
+        msg = (
+            f'今天是{get_week_day(get_time())}'
+            + '\n周报已更新\n'
+            + f'命运2 周报：\n图片作者：seanalpha\n{pzhoubao}'
+        )
         await svzb.broadcast(msg, 'zhoubao-reminder', 0.2)
 
 @svlj.scheduled_job('cron', hour='03', minute='00')
@@ -112,13 +106,14 @@ async def laojiureminder():
         imgdata = base64.b64decode(ls_f)
         save_dir = R.img('destiny2').path
         path_dir = os.path.join(save_dir,'xur.jpg')
-        file = open(path_dir,'wb')
-        file.write(imgdata)
-        file.close()
-        pxur = ' '.join(map(str, [
-            R.img(f'destiny2/xur.jpg').cqcode,
-        ]))
-        msg = '今天是' + get_week_day(get_time()) + '\n老九信息已更新\n' + f'命运2 仄：\n图片作者：seanalpha\n{pxur}'
+        with open(path_dir,'wb') as file:
+            file.write(imgdata)
+        pxur = ' '.join(map(str, [R.img('destiny2/xur.jpg').cqcode]))
+        msg = (
+            f'今天是{get_week_day(get_time())}'
+            + '\n老九信息已更新\n'
+            + f'命运2 仄：\n图片作者：seanalpha\n{pxur}'
+        )
         await svlj.broadcast(msg, 'laojiu-reminder', 0.2)
 
 @svsl.scheduled_job('cron', hour='03', minute='00')
@@ -130,13 +125,14 @@ async def shilianreminder():
         imgdata = base64.b64decode(ls_f)
         save_dir = R.img('destiny2').path
         path_dir = os.path.join(save_dir,'shilian.jpg')
-        file = open(path_dir,'wb')
-        file.write(imgdata)
-        file.close()
-        pshilian = ' '.join(map(str, [
-            R.img(f'destiny2/shilian.jpg').cqcode,
-        ]))
-        msg = '今天是' + get_week_day(get_time()) + '\n试炼周报已更新\n' + f'命运2 试炼周报：\n图片作者：seanalpha\n{pshilian}'
+        with open(path_dir,'wb') as file:
+            file.write(imgdata)
+        pshilian = ' '.join(map(str, [R.img('destiny2/shilian.jpg').cqcode]))
+        msg = (
+            f'今天是{get_week_day(get_time())}'
+            + '\n试炼周报已更新\n'
+            + f'命运2 试炼周报：\n图片作者：seanalpha\n{pshilian}'
+        )
         await svsl.broadcast(msg, 'shilian-reminder', 0.2)
 
 @svzw.scheduled_job('cron', hour='03', minute='00')
@@ -147,11 +143,12 @@ async def zhuwangreminder():
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'zhuwang.jpg')
-    file = open(path_dir,'wb')
-    file.write(imgdata)
-    file.close()
-    pzhuwang = ' '.join(map(str, [
-        R.img(f'destiny2/zhuwang.jpg').cqcode,
-    ]))
-    msg = '今天是' + get_week_day(get_time()) + '\n蛛王商店已刷新\n注意小黑盒蛛王信息可能更新较慢\n' + f'命运2 蛛王：\n图片来源：小黑盒百科\n{pzhuwang}'
+    with open(path_dir,'wb') as file:
+        file.write(imgdata)
+    pzhuwang = ' '.join(map(str, [R.img('destiny2/zhuwang.jpg').cqcode]))
+    msg = (
+        f'今天是{get_week_day(get_time())}'
+        + '\n蛛王商店已刷新\n注意小黑盒蛛王信息可能更新较慢\n'
+        + f'命运2 蛛王：\n图片来源：小黑盒百科\n{pzhuwang}'
+    )
     await svzw.broadcast(msg, 'zhuwang-reminder', 0.2)

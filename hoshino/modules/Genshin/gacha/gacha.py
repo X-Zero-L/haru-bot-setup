@@ -174,8 +174,8 @@ class Gacha(object):
 
         # role_name_path = os.path.join(ICON_PATH, "角色", str(name) + ".png")
         # arms_name_path = os.path.join(ICON_PATH, "武器", str(name) + ".png")
-        role_name_path = os.path.join(ICON_PATH, "角色图鉴", str(name) + ".png")
-        arms_name_path = os.path.join(ICON_PATH, "武器图鉴", str(name) + ".png")
+        role_name_path = os.path.join(ICON_PATH, "角色图鉴", f"{str(name)}.png")
+        arms_name_path = os.path.join(ICON_PATH, "武器图鉴", f"{str(name)}.png")
 
         if os.path.exists(role_name_path):
             return role_name_path
@@ -196,10 +196,10 @@ class Gacha(object):
         _5_star_up_list = POOL[self.pool]["5星up"]
         _4_star_up_list = POOL[self.pool]["4星up"]
 
-        if (name in ROLE_ARMS_LIST[_4_star_up_list]) or (name in ROLE_ARMS_LIST[_5_star_up_list]):
-            return True
-
-        return False
+        return (
+            name in ROLE_ARMS_LIST[_4_star_up_list]
+            or name in ROLE_ARMS_LIST[_5_star_up_list]
+        )
 
 
     @staticmethod
@@ -208,9 +208,7 @@ class Gacha(object):
         # 返回对应的星星数
         if name in ROLE_ARMS_LIST['5星全角色武器']:
             return "★★★★★"
-        if name in ROLE_ARMS_LIST['4星常驻池']: # 4星常驻池就包含所有4星角色装备了
-            return "★★★★"
-        return "★★★"
+        return "★★★★" if name in ROLE_ARMS_LIST['4星常驻池'] else "★★★"
 
     @staticmethod
     def pic2b64(im):
@@ -218,7 +216,7 @@ class Gacha(object):
         bio = BytesIO()
         im.save(bio, format='PNG')
         base64_str = base64.b64encode(bio.getvalue()).decode()
-        return 'base64://' + base64_str
+        return f'base64://{base64_str}'
 
     @staticmethod
     def ba64_to_cq(base64_str):
@@ -268,28 +266,26 @@ class Gacha(object):
             if name in ROLE_ARMS_LIST[up_5_star]:
                 self.last_5_up = self.current_times + 1
 
-        if not self.last_4:
-            if name in ROLE_ARMS_LIST["4星常驻池"]:
-                self.last_4 = self.current_times + 1
+        if not self.last_4 and name in ROLE_ARMS_LIST["4星常驻池"]:
+            self.last_4 = self.current_times + 1
 
-        if not self.last_5:
-            if name in ROLE_ARMS_LIST["5星全角色武器"]:
-                self.last_5 = self.current_times + 1
+        if not self.last_5 and name in ROLE_ARMS_LIST["5星全角色武器"]:
+            self.last_5 = self.current_times + 1
 
     def is_guaranteed(self,frequency):
         # 检查本轮抽卡是不是全保底
-        if frequency == 90 :
-            if self.gacha_rarity_statistics['5星'] == 1  and self.gacha_rarity_statistics['4星'] == 8:
-                return True
-        if frequency == 180 :
+        if frequency == 180:
             if self.gacha_rarity_statistics['5星'] == 2  and self.gacha_rarity_statistics['4星'] == 16:
+                return True
+        elif frequency == 90:
+            if self.gacha_rarity_statistics['5星'] == 1  and self.gacha_rarity_statistics['4星'] == 8:
                 return True
         return False
 
     def get_most_arms(self):
         # 返回抽出的武器抽出最多的是哪个，抽出了多少次
         if not self.gacha_all_statistics:
-            raise KeyError(f"字典 self.gacha_all_statistics 是空的")
+            raise KeyError("字典 self.gacha_all_statistics 是空的")
         most_value = max(self.gacha_all_statistics.values())
         for key,value in self.gacha_all_statistics.items():
             if most_value == value :
@@ -312,14 +308,12 @@ class Gacha(object):
         # UP武器和UP角色对应的列表是不一样的，详情看POOL
         up_5_star = POOL[self.pool]['5星up']
         all_5_star = POOL[self.pool]['随机全5星']
-        if self.is_up(self.last_time_5):
-
-            if random.random() < UP_PROBABILITY[self.pool]:
-                return random.choice(ROLE_ARMS_LIST[up_5_star])
-            else:
-                return random.choice(ROLE_ARMS_LIST[all_5_star])
-        else:
+        if not self.is_up(self.last_time_5):
             return random.choice(ROLE_ARMS_LIST[up_5_star])
+        if random.random() < UP_PROBABILITY[self.pool]:
+            return random.choice(ROLE_ARMS_LIST[up_5_star])
+        else:
+            return random.choice(ROLE_ARMS_LIST[all_5_star])
 
 
 
@@ -339,13 +333,12 @@ class Gacha(object):
         # UP武器和UP角色对应的列表是不一样的，详情看POOL
         up_4_star = POOL[self.pool]['4星up']
         all_4_star = POOL[self.pool]['随机全4星']
-        if self.is_up(self.last_time_4):
-            if random.random() < UP_PROBABILITY[self.pool]:
-                return random.choice(ROLE_ARMS_LIST[up_4_star])
-            else:
-                return random.choice(ROLE_ARMS_LIST[all_4_star])
-        else:
+        if not self.is_up(self.last_time_4):
             return random.choice(ROLE_ARMS_LIST[up_4_star])
+        if random.random() < UP_PROBABILITY[self.pool]:
+            return random.choice(ROLE_ARMS_LIST[up_4_star])
+        else:
+            return random.choice(ROLE_ARMS_LIST[all_4_star])
 
     def get_5_star_probability(self):
         # 获取本次抽5星的概率是多少
@@ -353,17 +346,17 @@ class Gacha(object):
 
         if self.pool == '武器up池':
             # 这是武器up池5星概率
-            if self.distance_5_star <= 62:
-                return basic_probability
-            else:
-                return basic_probability + 0.056 * (self.distance_5_star - 62)
+            return (
+                basic_probability
+                if self.distance_5_star <= 62
+                else basic_probability + 0.056 * (self.distance_5_star - 62)
+            )
+        # 下边是常驻池和角色UP池
+        # 这两个保底和概率是相同的所以放在一起
+        if self.distance_5_star <= 73:
+            return basic_probability
         else:
-            # 下边是常驻池和角色UP池
-            # 这两个保底和概率是相同的所以放在一起
-            if self.distance_5_star <= 73:
-                return basic_probability
-            else:
-                return basic_probability + 0.06 * (self.distance_5_star - 73)
+            return basic_probability + 0.06 * (self.distance_5_star - 73)
 
 
     def gacha_one(self):
@@ -461,7 +454,7 @@ class Gacha(object):
 
             new_gacha = self.gacha_one()
 
-            if not (new_gacha in ROLE_ARMS_LIST["3星武器"]): # 抽一井时图片上不保留3星的武器
+            if new_gacha not in ROLE_ARMS_LIST["3星武器"]: # 抽一井时图片上不保留3星的武器
                 self.gacha_list.append(new_gacha)
 
             self.add_gacha_all_statistics(new_gacha) # 把所有抽卡结果添加到gacha_all_statistics用于最后统计

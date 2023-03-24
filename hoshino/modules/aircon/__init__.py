@@ -40,37 +40,36 @@ sv = Service(
 
 @sv.on_fullmatch(('帮助空调', '帮助aircon', 'aircon帮助'))
 async def bangzhu_aircon(bot, ev):
-    if forward_msg_exchange == 1:
-        msg = sv_help
-        data = {
-            "type": "node",
-            "data": {
-                "name": f"{forward_msg_name}",
-                "uin": f"{forward_msg_uid}",
-                "content": msg
-            }
-        }
-        if recall_msg_set == 1:
-            recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
-            await asyncio.sleep(RECALL_MSG_TIME)
+	if forward_msg_exchange == 1:
+		msg = sv_help
+		data = {
+		    "type": "node",
+		    "data": {
+		        "name": f"{forward_msg_name}",
+		        "uin": f"{forward_msg_uid}",
+		        "content": msg
+		    }
+		}
+		if recall_msg_set == 1:
+		    recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+		    notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-            await bot.delete_msg(message_id=recall['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
-    else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, sv_help)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+		    await asyncio.sleep(RECALL_MSG_TIME)
 
-            await asyncio.sleep(RECALL_MSG_TIME)
+		    await bot.delete_msg(message_id=recall['message_id'])
+		    await bot.delete_msg(message_id=notice['message_id'])
+		else:
+		    await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+	elif recall_msg_set == 1:
+		recall_1 = await bot.send(ev, sv_help)
+		notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, sv_help)
+		await asyncio.sleep(RECALL_MSG_TIME)
+
+		await bot.delete_msg(message_id=recall_1['message_id'])
+		await bot.delete_msg(message_id=notice['message_id'])
+	else:
+		await bot.send(ev, sv_help)
 
 
 ac_type_text = ["家用空调","中央空调"]
@@ -163,11 +162,7 @@ async def aircon_now(bot,event):
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
 
-	if not aircon["is_on"]:
-		msg = "💤空调未开启\n" + msg
-	else:
-		msg = "❄" + msg
-
+	msg = f"❄{msg}" if aircon["is_on"] else "💤空调未开启\n" + msg
 	await bot.send(event, msg)
 
 @sv.on_prefix(('设置温度','设定温度'))
@@ -191,7 +186,7 @@ async def set_temp(bot,event):
 	aircon["set_temp"] = set_temp
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
-	await bot.send(event,"❄"+msg)
+	await bot.send(event, f"❄{msg}")
 
 @sv.on_prefix(('设置风速','设定风速','设置风量','设定风量'))
 async def set_wind_rate(bot,event):
@@ -215,7 +210,7 @@ async def set_wind_rate(bot,event):
 	aircon["wind_rate"] = wind_rate - 1
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
-	await bot.send(event,"❄"+msg)
+	await bot.send(event, f"❄{msg}")
 
 @sv.on_prefix(('设置环境温度','设定环境温度'))
 async def set_env_temp(bot,event):
@@ -240,11 +235,7 @@ async def set_env_temp(bot,event):
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
 
-	if not aircon["is_on"]:
-		msg = "💤空调未开启\n" + msg
-	else:
-		msg = "❄" + msg
-
+	msg = f"❄{msg}" if aircon["is_on"] else "💤空调未开启\n" + msg
 	await bot.send(event,msg)
 
 @sv.on_fullmatch(('空调类型',))
@@ -282,7 +273,7 @@ async def upgrade_aircon(bot,event):
 	aircon["ac_type"] = ac_type
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
-	msg = f"❄已升级至{ac_type_text[ac_type]}~\n" + msg
+	msg = f"❄已升级至{ac_type_text[ac_type]}~\n{msg}"
 	await bot.send(event,msg)
 
 @sv.on_fullmatch(('降级空调','空调降级'))
@@ -305,5 +296,5 @@ async def downgrade_aircon(bot,event):
 	aircon["ac_type"] = ac_type
 	msg = print_aircon(aircon)
 	write_group_aircon(__file__,aircons)
-	msg = f"❄已降级至{ac_type_text[ac_type]}~\n" + msg
+	msg = f"❄已降级至{ac_type_text[ac_type]}~\n{msg}"
 	await bot.send(event,msg)

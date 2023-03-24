@@ -24,9 +24,8 @@ async def bangzhu_kfc(bot, ev):
     await bot.send(ev, sv_help, at_sender=True)
 
 def get_kfc():
-    files = os.listdir(os.path.dirname(__file__) + '/record')
-    rec = random.choice(files)
-    return rec
+    files = os.listdir(f'{os.path.dirname(__file__)}/record')
+    return random.choice(files)
 
 
 @sv.on_fullmatch(('原神KFC', '原神kfc', '二次元KFC', '二次元kfc', '异世相遇尽享美味', '异世相遇'))

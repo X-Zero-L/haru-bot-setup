@@ -17,9 +17,7 @@ def getzhoubao(html111):
   for html10 in imglist:
     imglist = re.findall(r'https\:\\\/\\\/api\.xiaoheihe\.cn\\\/wiki\\\/get\_article\_for\_app.+?id\=1085660', html10)
     for html11 in imglist:
-      html11 = html11.replace('\\','')
-      # print(html11)
-      return html11
+      return html11.replace('\\','')
 
 # 返回周报的源码
 def getzhoubaoHtml1(html11):
@@ -36,7 +34,13 @@ def getzhoubaoImg(html1):
     return url1
 
 def sethtml1():
-  html1 = str(getzhoubaoHtml1(str(getzhoubao(str(getzhoubaoHtml("https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"))))))
-  return html1
+  return str(
+      getzhoubaoHtml1(
+          str(
+              getzhoubao(
+                  str(
+                      getzhoubaoHtml(
+                          "https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"
+                      ))))))
 
 # print(getzhoubaoImg(sethtml1()))

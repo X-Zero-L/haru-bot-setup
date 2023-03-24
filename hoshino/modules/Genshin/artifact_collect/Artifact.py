@@ -44,11 +44,9 @@ def init_json():
 
     for suit_name in ARTIFACT_LIST.keys():
         obtain = ARTIFACT_LIST[suit_name]["obtain"]
-        if obtain in artifact_obtain:
-            artifact_obtain[obtain].append(suit_name)
-        else:
+        if obtain not in artifact_obtain:
             artifact_obtain[obtain] = []
-            artifact_obtain[obtain].append(suit_name)
+        artifact_obtain[obtain].append(suit_name)
 
 init_json()
 
@@ -103,13 +101,10 @@ class Artifact(object):
 
     @staticmethod
     def number_to_str(number):
-        # 把数字转换成str并添加%符号
-        # 小于1的是百分比字符串，属性为数值或元素精通用整数，其他用浮点数
-        if number < 1 :
-            number = number*100
-            return ('%.1f'% number) + "%"
-        else:
+        if number >= 1:
             return str(int(number))
+        number = number*100
+        return ('%.1f'% number) + "%"
 
     def get_random_main(self):
         # 获取一个随机的主属性
@@ -146,7 +141,7 @@ class Artifact(object):
         temp_list = list(self.initial_secondary.keys())
         # temp_list.extend(strengthen_secondary_list)
         for i in strengthen_secondary_list:
-            if not (i in temp_list):
+            if i not in temp_list:
                 temp_list.append(i)
         # temp_list = list(set(temp_list))
         return temp_list
@@ -161,11 +156,9 @@ class Artifact(object):
             return PROPERTY_LIST["main"][self.main]["initial_value"] + self.level * PROPERTY_LIST["main"][self.main]["growth_value"]
 
     def get_secondary_property_value(self):
-        # 累加初始和强化副属性的值
-        # 返回一个字典，包含全部副属性和当前值是多少
-        secondary_property_value = {}
-        for secondary in self.get_all_secondary_name():
-            secondary_property_value[secondary] = 0
+        secondary_property_value = {
+            secondary: 0 for secondary in self.get_all_secondary_name()
+        }
         for key in self.initial_secondary.keys():
             secondary_property_value[key] += self.initial_secondary[key]
         for i in self.strengthen_secondary_list:
@@ -200,18 +193,15 @@ class Artifact(object):
             if len(self.initial_secondary) + len(self.strengthen_secondary_list) < 4:
 
                 secondary = self.get_random_secondary()
-                secondary_value = self.get_random_secondary_value(secondary)
                 strengthen_type = "add"
-                self.strengthen_secondary_list.append({"type": strengthen_type, "property": secondary, "value": secondary_value})
-
             else:
                 # 获取所有副属性
                 temp_list = self.get_all_secondary_name()
 
                 secondary = random.choice(temp_list)
-                secondary_value = self.get_random_secondary_value(secondary)
                 strengthen_type = "up"
-                self.strengthen_secondary_list.append({"type": strengthen_type, "property": secondary, "value": secondary_value})
+            secondary_value = self.get_random_secondary_value(secondary)
+            self.strengthen_secondary_list.append({"type": strengthen_type, "property": secondary, "value": secondary_value})
 
         return {"level":self.level,"strengthen_type":strengthen_type,"secondary":secondary,"secondary_value":secondary_value}
 
@@ -228,17 +218,11 @@ class Artifact(object):
         mes = self.get_artifact_CQ_code()
         mes += "\n\n"
 
-        if start < 1:
-            start = 1
-
+        start = max(start, 1)
         while start <= self.level:
             if (start % 4) == 0:
                 strengthen_type = self.strengthen_secondary_list[int(start//4)-1]["type"]
-                if strengthen_type == "up":
-                    strengthen_type = "强化"
-                else:
-                    strengthen_type = "新增"
-
+                strengthen_type = "强化" if strengthen_type == "up" else "新增"
                 secondary = self.strengthen_secondary_list[int(start//4)-1]["property"]
                 secondary = PROPERTY_LIST["secondary"][secondary]["txt"]
                 value = self.strengthen_secondary_list[int(start//4)-1]["value"]
@@ -294,7 +278,7 @@ class Artifact(object):
         image = self.get_artifact_image(number)
         bio = BytesIO()
         image.save(bio, format='PNG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
 
         return f"[CQ:image,file={base64_str}]"
 
@@ -302,8 +286,7 @@ class Artifact(object):
 
 def calculate_strengthen_points(start = 1, end = 20):
     # 计算强化需要的狗粮点数
-    if end > 20:
-        end = 20
+    end = min(end, 20)
     value = 0
     while start <= end:
         value += CONSUME_STRENGTHEN_POINTS[start]

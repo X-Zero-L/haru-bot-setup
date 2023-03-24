@@ -18,9 +18,9 @@ tz = pytz.timezone('Asia/Shanghai')
 _max = 1
 _nlmt = DailyNumberLimiter(_max)
 
-Wiki_Menu_Achievement_img = R.img(f"musewiki/etc/achieve.png").cqcode
-Wiki_show_Achieve_img_1 = R.img(f"musewiki/etc/SprTrophy.png").cqcode
-Wiki_show_Achieve_img_2 = R.img(f"musewiki/etc/DiamomdTrophy0000.png").cqcode
+Wiki_Menu_Achievement_img = R.img("musewiki/etc/achieve.png").cqcode
+Wiki_show_Achieve_img_1 = R.img("musewiki/etc/SprTrophy.png").cqcode
+Wiki_show_Achieve_img_2 = R.img("musewiki/etc/DiamomdTrophy0000.png").cqcode
 
 tips_tuple = _song_data.Muse_Tips
 
@@ -54,8 +54,7 @@ sv = Service(
 
 def get_voice_achieve_menu():
     filename = 'AchievementBgm.wav'
-    voice_rec = R.get('record/musewiki/audioclip/', filename)
-    return voice_rec
+    return R.get('record/musewiki/audioclip/', filename)
 
 @sv.on_fullmatch(["帮助MuseDash百科-成就查询", "帮助百科成就查询"])
 async def bangzhu_musewiki_achievement(bot, ev) -> MessageSegment:
@@ -88,7 +87,7 @@ async def bangzhu_musewiki_achievement(bot, ev) -> MessageSegment:
         greetings = '✧(≖ ◡ ≖✿)深夜好！'
         await bot.send(ev, greetings + tips)
     if not _nlmt.check(uid):
-        await bot.send(ev, f"欢迎继续使用MuseDash百科-成就查询！")
+        await bot.send(ev, "欢迎继续使用MuseDash百科-成就查询！")
     else:
         await bot.send(ev, voice_rec)
     _nlmt.increase(uid)
@@ -119,11 +118,11 @@ async def get_ach_info_from_song(ach):
 
 def keyword_search_ach(keyword):
     ach_dict = _song_data.SONG_DATA
-    result = []
-    for ach in ach_dict:
-        if keyword in ach_dict[ach][0] or keyword in ach_dict[ach][8]:  #获取歌曲原名和查询名，两个名字都可匹配，提高查询便利性
-            result.append(ach)
-    return result
+    return [
+        ach
+        for ach in ach_dict
+        if keyword in ach_dict[ach][0] or keyword in ach_dict[ach][8]
+    ]
 
 
 ACHIEVE_NOTICE = '''

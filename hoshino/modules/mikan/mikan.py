@@ -107,11 +107,11 @@ DEVICES = [
 async def mikan_poller():
     if not Mikan.rss_cache:
         await Mikan.update_cache()
-        sv.logger.info(f'订阅缓存为空，已加载至最新')
+        sv.logger.info('订阅缓存为空，已加载至最新')
         return
     new_bangumi = await Mikan.update_cache()
     if not new_bangumi:
-        sv.logger.info(f'未检索到番剧更新！')
+        sv.logger.info('未检索到番剧更新！')
     else:
         sv.logger.info(f'检索到{len(new_bangumi)}条番剧更新！')
         msg = [ f'{i[1]} 【{i[2].strftime(r"%Y-%m-%d %H:%M")}】\n▲下载 {i[0]}' for i in new_bangumi ]
@@ -141,21 +141,20 @@ async def send_bangumi(bot, ev):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
-            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)      
-    else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, f'最近更新的番剧：\n{msg}')
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, f'最近更新的番剧：\n{msg}')
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-            await asyncio.sleep(RECALL_MSG_TIME)
+        await asyncio.sleep(RECALL_MSG_TIME)
 
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:  
-            await bot.send(ev, f'最近更新的番剧：\n{msg}')
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
+    else:  
+        await bot.send(ev, f'最近更新的番剧：\n{msg}')

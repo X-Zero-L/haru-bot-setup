@@ -42,15 +42,15 @@ async def lssv(session: CommandSession):
             x = '○' if on else '×'
             msg.append(f"|{x}| {sv.name}")
     msg='\n'.join(msg)
-    data ={
-            "type": "node",
-            "data": {
-                "name": 'bot主人2279134404',
-                "uin": '756160433',
-                "content": msg
-            }
-        }
     if forward_msg_exchange == 1:
+        data ={
+                "type": "node",
+                "data": {
+                    "name": 'bot主人2279134404',
+                    "uin": '756160433',
+                    "content": msg
+                }
+            }
         await bot.send_group_forward_msg(group_id=session.ctx.get('group_id'), messages=data)
     else:
         await session.send(msg)

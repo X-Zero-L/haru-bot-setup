@@ -17,8 +17,7 @@ color = [
 
 def create_image(item_number):
     height = item_number * 30
-    im = Image.new('RGBA', (width, height), (255, 255, 255, 0))
-    return im
+    return Image.new('RGBA', (width, height), (255, 255, 255, 0))
 
 
 def draw_rec(im, color, x, y, w, h, r):
@@ -60,10 +59,7 @@ def draw_item(im, n, t, text, days, forever):
     im.paste(im1, (x, y), mask=a)
 
     if days > 0:
-        if forever:
-            text1 = '永久开放'
-        else:
-            text1 = f'{days}天后结束'
+        text1 = '永久开放' if forever else f'{days}天后结束'
     elif days < 0:
         text1 = f'{-days}天后开始'
     else:

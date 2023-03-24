@@ -12,7 +12,7 @@ assert RES_PROTOCOL in ('http', 'file', 'base64')
 logger = log.new_logger('config', DEBUG)
 for module in MODULES_ON:
     try:
-        importlib.import_module('hoshino.config.' + module)
+        importlib.import_module(f'hoshino.config.{module}')
         logger.info(f'Succeeded to load config of "{module}"')
     except ModuleNotFoundError:
         logger.warning(f'Not found config of "{module}"')

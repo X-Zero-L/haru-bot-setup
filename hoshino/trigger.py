@@ -129,8 +129,7 @@ class RexTrigger(BaseTrigger):
         for rex, sfs in self.allrex.items():
             for sf in sfs:
                 text = event.norm_text if sf.normalize_text else event.plain_text
-                match = rex.search(text)
-                if match:
+                if match := rex.search(text):
                     event["match"] = match
                     ret.append(sf)
         return ret

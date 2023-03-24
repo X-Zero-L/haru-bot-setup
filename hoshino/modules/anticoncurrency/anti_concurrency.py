@@ -51,13 +51,22 @@ def is_list_generated_by_one_element(list_, element):
 def sf_wrapper(func, trigger_group_index, trigger_word):
     @wraps(func)
     async def wrapper(bot, ev: CQEvent):
-        if process_status_dict.get((ev.group_id, trigger_group_index)):
-            if not SELF_CONCURRENCY or (SELF_CONCURRENCY and not is_list_generated_by_one_element(process_status_dict[(ev.group_id, trigger_group_index)], trigger_word)):
-                await bot.send(ev, '要、要同时执行这么多指令吗? 呜, 晕头转向了...做不到')
-                sv.logger.info('由于检测到未执行完的同组指令, 消息已被anti-concurrency插件自动忽略')
-                return
+        if process_status_dict.get((ev.group_id, trigger_group_index)) and (
+            not SELF_CONCURRENCY
+            or (
+                SELF_CONCURRENCY
+                and not is_list_generated_by_one_element(
+                    process_status_dict[(ev.group_id, trigger_group_index)],
+                    trigger_word,
+                )
+            )
+        ):
+            await bot.send(ev, '要、要同时执行这么多指令吗? 呜, 晕头转向了...做不到')
+            sv.logger.info('由于检测到未执行完的同组指令, 消息已被anti-concurrency插件自动忽略')
+            return
         with Process_Monitor(ev.group_id, trigger_group_index, trigger_word, process_status_dict) as pm:
             return await func(bot, ev)
+
     return wrapper
 
 

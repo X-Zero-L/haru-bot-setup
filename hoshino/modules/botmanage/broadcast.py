@@ -12,15 +12,15 @@ broadcast_record = []
 @sucmd('broadcast', aliases=('bc', '广播'))
 async def broadcast(session: CommandSession):
     msg = session.current_arg
-    if not ' ' in msg:
-        await session.send(f'请输入服务名，全群广播则输入all，分群广播请以"g-"开头后接QQ群号，并以逗号相隔')
+    if ' ' not in msg:
+        await session.send('请输入服务名，全群广播则输入all，分群广播请以"g-"开头后接QQ群号，并以逗号相隔')
         return
     args = msg.split(' ',1)
     bc_sv_name =  args[0]
     bc_msg = args[1]
     svs = Service.get_loaded_services()
     if bc_sv_name not in svs and bc_sv_name != 'all' and not bc_sv_name.startswith('g-'):
-        await session.send(f'未找到该服务，请输入正确的服务')
+        await session.send('未找到该服务，请输入正确的服务')
         return
     sid = list(hoshino.get_self_ids())[0]
     if bc_sv_name == 'all':
@@ -46,7 +46,7 @@ async def broadcast(session: CommandSession):
                     await session.send(f'群{g} 投递广播失败：{type(e)}')
                 except Exception as e:
                     hoshino.logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
-    await session.send(f'广播完成！')
+    await session.send('广播完成！')
     await asyncio.sleep(120)
     with await lock:
         broadcast_record.clear()
@@ -59,14 +59,14 @@ async def broadcast_list(session: CommandSession):
     for g in gl:
         group_name = g['group_name']
         group_id = g['group_id']
-        msg = msg + f'\n{group_name}: {group_id}'
+        msg = f'{msg}\n{group_name}: {group_id}'
     await session.send(msg)
 
 @sucmd('broadcast_recall', aliases=('bc_recall', '广播撤回'))
 async def broadcast_recall(session: CommandSession):
     with await lock:
         if len(broadcast_record) == 0:
-            await session.send(f'无可以撤回的广播')
+            await session.send('无可以撤回的广播')
             return
         for msg_id in broadcast_record:
             try:
@@ -78,4 +78,4 @@ async def broadcast_recall(session: CommandSession):
                 except Exception as e:
                     hoshino.logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
         broadcast_record.clear()
-    await session.send(f'广播撤回完成！')
+    await session.send('广播撤回完成！')

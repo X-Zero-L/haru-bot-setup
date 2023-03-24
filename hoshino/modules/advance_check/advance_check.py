@@ -133,29 +133,28 @@ def window_capture(dpath):
     cc=time.gmtime()
     bmpname=str(cc[0])+str(cc[1])+str(cc[2])+str(cc[3]+8)+str(cc[4])+str(cc[5])+'.bmp'
     saveBitMap.SaveBitmapFile(saveDC, bmpname)
-    Image.open(bmpname).save(bmpname[:-4]+".jpg")
+    Image.open(bmpname).save(f"{bmpname[:-4]}.jpg")
     os.remove(bmpname)
-    jpgname=bmpname[:-4]+'.jpg'
+    jpgname = f'{bmpname[:-4]}.jpg'
     djpgname=dpath+jpgname
-    copy_command = "move %s %s" % (jpgname, djpgname)
+    copy_command = f"move {jpgname} {djpgname}"
     os.popen(copy_command)
-    return bmpname[:-4]+'.jpg' #返回的是图片文件名，不带路径
+    return f'{bmpname[:-4]}.jpg'
 
 # 获取文件目录大小
 def getdirsize(dir):
-    size = 0
-    for root, dirs, files in os.walk(dir):
-        size += sum([getsize(join(root, name)) for name in files])
-    return size
+    return sum(
+        sum(getsize(join(root, name)) for name in files)
+        for root, dirs, files in os.walk(dir)
+    )
 
 def countFile(dir):
-    tmp = 0
-    for item in os.listdir(dir):
-        if os.path.isfile(os.path.join(dir, item)):
-            tmp += 1
-        else:
-            tmp += countFile(os.path.join(dir, item))
-    return tmp
+    return sum(
+        1
+        if os.path.isfile(os.path.join(dir, item))
+        else countFile(os.path.join(dir, item))
+        for item in os.listdir(dir)
+    )
 
 # 清理文件目录
 def RemoveDir(filepath):
@@ -163,11 +162,9 @@ def RemoveDir(filepath):
     如果文件夹不存在就创建，如果文件存在就清空！
     
     '''
-    if not os.path.exists(filepath):
-        os.mkdir(filepath)
-    else:
+    if os.path.exists(filepath):
         shutil.rmtree(filepath)
-        os.mkdir(filepath)
+    os.mkdir(filepath)
 
 
 sv_help = '''
@@ -198,19 +195,19 @@ async def screenshots(bot, ev):
         hour_str = f' {hour}' if hour<10 else str(hour)
         minute_str = f' {minute}' if minute<10 else str(minute)
         sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分查看服务器全屏截图, 已拒绝")
-        not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
+        not_allowed_msg = "权限不足。"
         await bot.send(ev, not_allowed_msg, at_sender=True)
         return
     else:
         screenshot = window_capture(f"{main_path}img/advance_check/") #截图存放路径
-        await bot.send(ev, f"即将发送服务器全屏截图，请等候...")
+        await bot.send(ev, "即将发送服务器全屏截图，请等候...")
         time.sleep(scwaits)
         await bot.send(ev, R.img(f'advance_check/{screenshot}').cqcode)
 
 @sv.on_fullmatch(["清理adck", "清除adck"])
 async def deleteshots(bot, ev):
     path = f"{main_path}img/advance_check/"
-    shots_all_num = countFile(str(main_path+"img/advance_check/"))  #同上
+    shots_all_num = countFile(str(f"{main_path}img/advance_check/"))
     shots_all_size = getdirsize(f"{main_path}img/advance_check/")  #同上
     all_size_num = '%.3f' % (shots_all_size / 1024 / 1024)
     now = datetime.now()
@@ -220,7 +217,7 @@ async def deleteshots(bot, ev):
     minute_str = f' {minute}' if minute<10 else str(minute)
     if not priv.check_priv(ev, priv.SUPERUSER):   #建议使用priv.SUPERUSER
         sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分清除服务器全屏截图, 已拒绝")
-        not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
+        not_allowed_msg = "权限不足。"
         await bot.send(ev, not_allowed_msg, at_sender=True)
         return
     else:
@@ -259,12 +256,11 @@ async def advance_check_set(bot, ev: CQEvent):
         hour_str = f' {hour}' if hour<10 else str(hour)
         minute_str = f' {minute}' if minute<10 else str(minute)
         sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分查看服务器配置, 已拒绝")
-        not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
+        not_allowed_msg = "权限不足。"
         await bot.send(ev, not_allowed_msg, at_sender=True)
         return
     else:
         if forward_msg_exchange == 1:  #简易的判断是否使用合并转发
-            data_all = []
             text1 = COMPUTER_INFO_ALL
             data1 = {
                 "type": "node",
@@ -291,7 +287,7 @@ async def advance_check_set(bot, ev: CQEvent):
                     "uin": f"{forward_msg_uid}",
                     "content": text3
                 }
-            }            
+            }
             text4 = PROCESSOR_INFO_ALL
             data4 = {
                 "type": "node",
@@ -300,7 +296,7 @@ async def advance_check_set(bot, ev: CQEvent):
                     "uin": f"{forward_msg_uid}",
                     "content": text4
                 }
-            }            
+            }
             text5 = BIOS_INFO_ALL
             data5 = {
                 "type": "node",
@@ -309,7 +305,7 @@ async def advance_check_set(bot, ev: CQEvent):
                     "uin": f"{forward_msg_uid}",
                     "content": text5
                 }
-            }            
+            }
             text6 = MEMORY_INFO_ALL
             data6 = {
                 "type": "node",
@@ -318,7 +314,7 @@ async def advance_check_set(bot, ev: CQEvent):
                     "uin": f"{forward_msg_uid}",
                     "content": text6
                 }
-            }            
+            }
             text7 = DISK_INFO_ALL
             data7 = {
                 "type": "node",
@@ -327,59 +323,59 @@ async def advance_check_set(bot, ev: CQEvent):
                     "uin": f"{forward_msg_uid}",
                     "content": text7
                 }
-            }            
+            }
+            data_all = []
             text8 = VIDEO_INFO_ALL
             data8 = {
                 "type": "node",
                 "data": {
                     "name": f"{forward_msg_name}",
                     "uin": f"{forward_msg_uid}",
-                    "content": text8
-                }
+                    "content": text8,
+                },
             }
             data_all=[data1,data2,data3,data4,data5,data6,data7,data8]
             if recall_msg_set == 1:  #简易的判断是否定时撤回
                 recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
                 notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
                 await asyncio.sleep(RECALL_MSG_TIME)
 
                 await bot.delete_msg(message_id=recall['message_id'])
                 await bot.delete_msg(message_id=notice['message_id'])
             else:
                 await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
+        elif recall_msg_set == 1:  #简易的判断是否定时撤回
+            recall_1 = await bot.send(ev, COMPUTER_INFO_ALL)
+            recall_2 = await bot.send(ev, OPERATING_INFO_ALL)
+            recall_3 = await bot.send(ev, NETWORK_INFO_ALL)
+            recall_4 = await bot.send(ev, PROCESSOR_INFO_ALL)
+            recall_5 = await bot.send(ev, BIOS_INFO_ALL)
+            recall_6 = await bot.send(ev, MEMORY_INFO_ALL)
+            recall_7 = await bot.send(ev, DISK_INFO_ALL)
+            recall_8 = await bot.send(ev, VIDEO_INFO_ALL)
+            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+            await asyncio.sleep(RECALL_MSG_TIME)
+
+            await bot.delete_msg(message_id=recall_1['message_id'])
+            await bot.delete_msg(message_id=recall_2['message_id'])
+            await bot.delete_msg(message_id=recall_3['message_id'])
+            await bot.delete_msg(message_id=recall_4['message_id'])
+            await bot.delete_msg(message_id=recall_5['message_id'])
+            await bot.delete_msg(message_id=recall_6['message_id'])
+            await bot.delete_msg(message_id=recall_7['message_id'])
+            await bot.delete_msg(message_id=recall_8['message_id'])
+            await bot.delete_msg(message_id=notice['message_id'])
         else:
-            if recall_msg_set == 1:  #简易的判断是否定时撤回
-                recall_1 = await bot.send(ev, COMPUTER_INFO_ALL)
-                recall_2 = await bot.send(ev, OPERATING_INFO_ALL)
-                recall_3 = await bot.send(ev, NETWORK_INFO_ALL)
-                recall_4 = await bot.send(ev, PROCESSOR_INFO_ALL)
-                recall_5 = await bot.send(ev, BIOS_INFO_ALL)
-                recall_6 = await bot.send(ev, MEMORY_INFO_ALL)
-                recall_7 = await bot.send(ev, DISK_INFO_ALL)
-                recall_8 = await bot.send(ev, VIDEO_INFO_ALL)
-                notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-                await asyncio.sleep(RECALL_MSG_TIME)
-
-                await bot.delete_msg(message_id=recall_1['message_id'])
-                await bot.delete_msg(message_id=recall_2['message_id'])
-                await bot.delete_msg(message_id=recall_3['message_id'])
-                await bot.delete_msg(message_id=recall_4['message_id'])
-                await bot.delete_msg(message_id=recall_5['message_id'])
-                await bot.delete_msg(message_id=recall_6['message_id'])
-                await bot.delete_msg(message_id=recall_7['message_id'])
-                await bot.delete_msg(message_id=recall_8['message_id'])
-                await bot.delete_msg(message_id=notice['message_id'])
-            else:
-                await bot.send(ev, COMPUTER_INFO_ALL)
-                await bot.send(ev, OPERATING_INFO_ALL)
-                await bot.send(ev, NETWORK_INFO_ALL)
-                await bot.send(ev, PROCESSOR_INFO_ALL)
-                await bot.send(ev, BIOS_INFO_ALL)
-                await bot.send(ev, MEMORY_INFO_ALL)
-                await bot.send(ev, DISK_INFO_ALL)
-                await bot.send(ev, VIDEO_INFO_ALL)
+            await bot.send(ev, COMPUTER_INFO_ALL)
+            await bot.send(ev, OPERATING_INFO_ALL)
+            await bot.send(ev, NETWORK_INFO_ALL)
+            await bot.send(ev, PROCESSOR_INFO_ALL)
+            await bot.send(ev, BIOS_INFO_ALL)
+            await bot.send(ev, MEMORY_INFO_ALL)
+            await bot.send(ev, DISK_INFO_ALL)
+            await bot.send(ev, VIDEO_INFO_ALL)
 
 svadpush = Service(
     name = 'adcheck_push',  #功能名

@@ -55,7 +55,7 @@ async def _get_artifact(bot, ev):
     if obtain == "":
         return
 
-    if not (obtain in artifact_obtain.keys()):
+    if obtain not in artifact_obtain.keys():
         mes = f"没有副本名叫 {obtain} ,发送 原神副本 可查看所有副本"
         await bot.send(ev, mes, at_sender=True)
         return
@@ -80,7 +80,7 @@ async def _get_artifact(bot, ev):
 
         artifact = Artifact(r_artifact_name)
 
-        number = int(len(user_info[uid]["warehouse"])) + 1
+        number = len(user_info[uid]["warehouse"]) + 1
 
         # mes += f"当前仓库编号 {number}\n"
         mes += artifact.get_artifact_CQ_code(number)
@@ -241,7 +241,7 @@ async def _transform_strengthen(bot, ev):
 
     save_user_info()
 
-    mes = f"转化完成，圣遗物已转化为 {int(strengthen_points)} 狗粮点数\n你当前狗粮点数为 {int(user_info[uid]['strengthen_points'])} "
+    mes = f"转化完成，圣遗物已转化为 {strengthen_points} 狗粮点数\n你当前狗粮点数为 {int(user_info[uid]['strengthen_points'])} "
     await bot.send(ev, mes, at_sender=True)
 
 
@@ -266,7 +266,7 @@ async def kakin(bot, ev):
             init_user_info(uid)
             user_info[uid]["stamina"] += 60
     save_user_info()
-    await bot.send(ev,f"充值完毕！谢谢惠顾～")
+    await bot.send(ev, "充值完毕！谢谢惠顾～")
 
 
 @sv.on_fullmatch(["转化全部0级圣遗物","转换全部0级圣遗物"])

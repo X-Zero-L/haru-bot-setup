@@ -14,11 +14,10 @@ f.close()
 
 def load_cache():
     cache = {}
-    f = open('arc_namecache.txt', 'r')
-    for line in f.readlines():
-        ls = line.replace('\n', '').split(' ')
-        cache[ls[0]] = ls[1]
-    f.close()
+    with open('arc_namecache.txt', 'r') as f:
+        for line in f:
+            ls = line.replace('\n', '').split(' ')
+            cache[ls[0]] = ls[1]
     return cache
 
 
@@ -34,7 +33,7 @@ def cmp(a):
 
 def calc(ptt, s):
     brating = 0
-    for i in range(0, 30):
+    for i in range(30):
         try:
             brating += s[i]['rating']
         except IndexError:
@@ -46,7 +45,7 @@ def calc(ptt, s):
 
 def lookup(nickname: str):
     ws = websocket.create_connection("wss://arc.estertion.win:616/")
-    ws.send("lookup " + nickname)
+    ws.send(f"lookup {nickname}")
     buffer = ""
     while buffer != "bye":
         buffer = ws.recv()
@@ -73,12 +72,12 @@ def best(id: str, num: int):
     if num < 1:
         return []
     if num > 30:
-        return []    
+        return []
     result = []
     s = ""
     song_title, userinfo, scores = _query(id)
     s += "%s's Top %d Songs:\n" % (userinfo['name'], num)
-    for j in range(0, int((num - 1) / 15) + 1):
+    for j in range(int((num - 1) / 15) + 1):
         for i in range(15 * j, 15 * (j + 1)):
             if i >= num:
                 break
@@ -139,15 +138,14 @@ class QueryThread(threading.Thread):
             try:
                 message = query(self.state['id'])
             except Exception as e:
-                message = "An exception occurred: %s" % repr(e)
+                message = f"An exception occurred: {repr(e)}"
             funcs.append(self.bot.send(self.ctx, message=message))
         elif self.operation == 'best':
             try:
                 s = best(self.state['id'], self.state['num'])
             except Exception as e:
-                s = ["An exception occurred: %s" % repr(e)]
-            for elem in s:
-                funcs.append(self.bot.send(self.ctx, message=elem))
+                s = [f"An exception occurred: {repr(e)}"]
+            funcs.extend(self.bot.send(self.ctx, message=elem) for elem in s)
         loop = asyncio.new_event_loop()
         loop.run_until_complete(asyncio.wait(funcs))
         loop.close()

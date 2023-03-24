@@ -63,10 +63,7 @@ async def gacha_(bot, ev):
     if not daily_limiter_10.check(userid):
         await bot.send(ev, '今天已经抽了很多次啦，明天再来吧~')
         return
-    if gid in group_pool:
-        G = Gacha(group_pool[gid])
-    else:
-        G = Gacha()
+    G = Gacha(group_pool[gid]) if gid in group_pool else Gacha()
     daily_limiter_10.increase(userid)
     await bot.send(ev, G.gacha_10() , at_sender=True)
 
@@ -77,10 +74,7 @@ async def gacha_(bot, ev):
     if not daily_limiter_90.check(userid):
         await bot.send(ev, '今天已经抽了很多次啦，明天再来吧~')
         return
-    if gid in group_pool:
-        G = Gacha(group_pool[gid])
-    else:
-        G = Gacha()
+    G = Gacha(group_pool[gid]) if gid in group_pool else Gacha()
     daily_limiter_90.increase(userid)
     await bot.send(ev, G.gacha_90(90) , at_sender=True)
 
@@ -94,10 +88,7 @@ async def gacha_(bot, ev):
         await bot.send(ev, '今天已经抽了很多次啦，明天再来吧~')
         return
     daily_limiter_180.increase(userid)
-    if gid in group_pool:
-        G = Gacha(group_pool[gid])
-    else:
-        G = Gacha()
+    G = Gacha(group_pool[gid]) if gid in group_pool else Gacha()
     await bot.send(ev, G.gacha_90(180) , at_sender=True)
 
 
@@ -106,11 +97,7 @@ async def gacha_(bot, ev):
 async def gacha_(bot, ev):
     gid = str(ev.group_id)
 
-    if gid in group_pool:
-        info = gacha_info(group_pool[gid])
-    else:
-        info = gacha_info()
-
+    info = gacha_info(group_pool[gid]) if gid in group_pool else gacha_info()
     await bot.send(ev, info , at_sender=True)
 
 @sv.on_prefix(('原神卡池切换','原神切换卡池'))

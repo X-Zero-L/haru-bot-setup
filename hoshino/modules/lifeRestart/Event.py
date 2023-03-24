@@ -27,8 +27,7 @@ class Event:
             if b.cond(prop):
                 prop.apply(self._effect)
                 yield self.name
-                for text in runner(b.evt):
-                    yield text
+                yield from runner(b.evt)
                 return
         prop.apply(self._effect)
         yield self.name

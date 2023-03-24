@@ -74,7 +74,7 @@ class Life:
     
     def choose(self):
         talents = list(self.talent.genTalents(Life.talent_randomized))
-        tdict = dict((t.id, t) for t in talents)
+        tdict = {t.id: t for t in talents}
 
         while len(self.talent.talents) < Life.talent_choose:
             try:
@@ -89,9 +89,9 @@ class Life:
                 tdict.pop(t.id)
             except Exception as e:
                 self._errorhandler(e)
-        
+
         self.talent.updateTalentProp()
-        
+
         while True:
             try:
                 eff = self._propertyhandler(self.property.total)

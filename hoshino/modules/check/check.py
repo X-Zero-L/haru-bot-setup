@@ -60,7 +60,7 @@ async def check_task():
 async def info_check(bot, ev):
     if not priv.check_priv(ev, priv.SUPERUSER):
         util.log(f'{ev.user_id}尝试查看服务器状态, 已拒绝')
-        await bot.send(ev, f"权限不足。", at_sender=True)
+        await bot.send(ev, "权限不足。", at_sender=True)
         return
     else:
         result = await check.get_check_easy()

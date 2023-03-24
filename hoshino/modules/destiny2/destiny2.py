@@ -14,10 +14,7 @@ from .get_zhu_info import *
 
 if os.path.exists(R.img('destiny2').path):
     shutil.rmtree(R.img('destiny2').path)  #删除目录，包括目录下的所有文件
-    os.mkdir(R.img('destiny2').path)
-else:
-    os.mkdir(R.img('destiny2').path)
-
+os.mkdir(R.img('destiny2').path)
 forward_msg_exchange = config.FORWARD_MSG_EXCHANGE
 forward_msg_name = config.FORWARD_MSG_NAME
 forward_msg_uid = config.FORWARD_MSG_UID
@@ -59,24 +56,23 @@ async def bangzhu_destiny2(bot, ev):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
-            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)        
-    else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, sv_help)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, sv_help)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-            await asyncio.sleep(RECALL_MSG_TIME)
+        await asyncio.sleep(RECALL_MSG_TIME)
 
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:               
-            await bot.send(ev, sv_help)
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
+    else:               
+        await bot.send(ev, sv_help)
 
 #周报功能
 @sv.on_fullmatch(('周报','命运2周报'))
@@ -87,14 +83,11 @@ async def zhoubao(bot, ev):
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'zhoubao.jpg')
-    file = open(path_dir,'wb')
-    # 以base64的形式写入文件，用于下载图片
-    file.write(imgdata)
-    file.close()
+    with open(path_dir,'wb') as file:
+        # 以base64的形式写入文件，用于下载图片
+        file.write(imgdata)
     # 先用下面这个形式写，万一以后要加新功能呢
-    pzhoubao = ' '.join(map(str, [
-        R.img(f'destiny2/zhoubao.jpg').cqcode,
-    ]))
+    pzhoubao = ' '.join(map(str, [R.img('destiny2/zhoubao.jpg').cqcode]))
     msg = f'命运2 周报：\n图片作者：seanalpha\n{pzhoubao}'
     await bot.send(ev, msg)
 
@@ -106,12 +99,9 @@ async def xur(bot, ev):
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'xur.jpg')
-    file = open(path_dir,'wb')
-    file.write(imgdata)
-    file.close()
-    pxur = ' '.join(map(str, [
-        R.img(f'destiny2/xur.jpg').cqcode,
-    ]))
+    with open(path_dir,'wb') as file:
+        file.write(imgdata)
+    pxur = ' '.join(map(str, [R.img('destiny2/xur.jpg').cqcode]))
     msg = f'命运2 仄：\n图片作者：seanalpha\n{pxur}'
     await bot.send(ev, msg)
 
@@ -123,12 +113,9 @@ async def chall(bot, ev):
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'shilian.jpg')
-    file = open(path_dir,'wb')
-    file.write(imgdata)
-    file.close()
-    pshilian = ' '.join(map(str, [
-        R.img(f'destiny2/shilian.jpg').cqcode,
-    ]))
+    with open(path_dir,'wb') as file:
+        file.write(imgdata)
+    pshilian = ' '.join(map(str, [R.img('destiny2/shilian.jpg').cqcode]))
     msg = f'命运2 试炼周报：\n图片作者：seanalpha\n{pshilian}'
     await bot.send(ev, msg)
 
@@ -140,12 +127,9 @@ async def zhu(bot, ev):
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'zhuwang.jpg')
-    file = open(path_dir,'wb')
-    file.write(imgdata)
-    file.close()
-    pzhuwang = ' '.join(map(str, [
-        R.img(f'destiny2/zhuwang.jpg').cqcode,
-    ]))
+    with open(path_dir,'wb') as file:
+        file.write(imgdata)
+    pzhuwang = ' '.join(map(str, [R.img('destiny2/zhuwang.jpg').cqcode]))
     msg = f'命运2 蛛王：\n图片来源：小黑盒百科\n注意小黑盒蛛王信息可能更新较慢\n{pzhuwang}'
     await bot.send(ev, msg)
 
@@ -157,12 +141,9 @@ async def buy(bot, ev):
     imgdata = base64.b64decode(ls_f)
     save_dir = R.img('destiny2').path
     path_dir = os.path.join(save_dir,'guangchen.jpg')
-    file = open(path_dir,'wb')
-    file.write(imgdata)
-    file.close()
-    pguangchen = ' '.join(map(str, [
-        R.img(f'destiny2/guangchen.jpg').cqcode,
-    ]))
+    with open(path_dir,'wb') as file:
+        file.write(imgdata)
+    pguangchen = ' '.join(map(str, [R.img('destiny2/guangchen.jpg').cqcode]))
     msg = f'命运2 第13赛季光尘商店：\n{pguangchen}'
     await bot.send(ev, msg)
 

@@ -67,7 +67,7 @@ async def open_remind(bot , ev):
         return
 
     gid = str(ev.group_id)
-    if not (gid in group_list):
+    if gid not in group_list:
         group_list.append(gid)
         save_group_list()
     await bot.send(ev, "每日提醒已开启，每天8点会发送今日原神黄历")
