@@ -64,7 +64,6 @@ def gen_bundle_manual(bundle_name, service_list, gid):
 @sv.on_fullmatch(["帮助雀魂查询"])
 async def bangzhu_majsoul(bot, ev: CQEvent):
     if forward_msg_exchange == 1:
-        data_all = []
         msg1 = sv_help
         data1 = {
             "type": "node",
@@ -83,42 +82,42 @@ async def bangzhu_majsoul(bot, ev: CQEvent):
                     "content": msg2
                 }
             }
+        data_all = []
         msg3 = majsoul_help_2
         data3 = {
-                "type": "node",
-                "data": {
-                    "name": f"{forward_msg_name}",
-                    "uin": f"{forward_msg_uid}",
-                    "content": msg3
-                }
-            }
+            "type": "node",
+            "data": {
+                "name": f"{forward_msg_name}",
+                "uin": f"{forward_msg_uid}",
+                "content": msg3,
+            },
+        }
         data_all=[data1,data2,data3]
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
             await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, sv_help)
+        recall_2 = await bot.send(ev, majsoul_help_1)
+        recall_3 = await bot.send(ev, majsoul_help_2)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=recall_2['message_id'])
+        await bot.delete_msg(message_id=recall_3['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, sv_help)
-            recall_2 = await bot.send(ev, majsoul_help_1)
-            recall_3 = await bot.send(ev, majsoul_help_2)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=recall_2['message_id'])
-            await bot.delete_msg(message_id=recall_3['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, sv_help)
-            await bot.send(ev, majsoul_help_1)
-            await bot.send(ev, majsoul_help_2)
+        await bot.send(ev, sv_help)
+        await bot.send(ev, majsoul_help_1)
+        await bot.send(ev, majsoul_help_2)
 
 

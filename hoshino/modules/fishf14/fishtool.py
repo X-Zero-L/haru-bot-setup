@@ -5,7 +5,7 @@ from . import sv
 def find(target, dictData):
     ''' 查找单个键 '''
     queue = [dictData]
-    while len(queue) > 0:
+    while queue:
         data = queue.pop()
         for key, value in data.items():
             if key == target:
@@ -20,7 +20,7 @@ def findAll(target, dictData):
     queue = [dictData]
     result = []
     notFound = []
-    while len(queue) > 0:
+    while queue:
         data = queue.pop()
         for key, value in data.items():
             if key == target:
@@ -58,7 +58,7 @@ class Fish:
                 probability = v['probability']
                 baits += f'{baitname}：{probability}，'
             areas = '，'.join(str(v) for v in result['areas'])
-            msg = f'''
+            return f'''
 名称：{fishname}
 时间：{time}
 竿型：{tug}
@@ -75,7 +75,6 @@ class Fish:
 区域：{areas}
 选饵：{baits}
 '''.strip()
-            return msg
         except Exception as ex:
             sv.logger.error(ex)
             return None

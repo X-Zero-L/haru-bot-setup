@@ -39,10 +39,9 @@ async def bangzhu_maimai(bot, ev):
 static = os.path.join(os.path.dirname(__file__), 'static')
 
 def random_music(music: Music) -> str:
-    msg = f'''{music.id}. {music.title}
+    return f'''{music.id}. {music.title}
 [CQ:image,file=https://www.diving-fish.com/covers/{music.id}.jpg]
 {'/'.join(music.level)}'''
-    return msg
 
 def song_level(ds1: float, ds2: float = None) -> list:
     result = []
@@ -52,8 +51,16 @@ def song_level(ds1: float, ds2: float = None) -> list:
     else:
         music_data = total_list.filter(ds=ds1)
     for music in sorted(music_data, key = lambda i: int(i['id'])):
-        for i in music.diff:
-            result.append((music['id'], music['title'], music['ds'][i], diff_label[i], music['level'][i]))
+        result.extend(
+            (
+                music['id'],
+                music['title'],
+                music['ds'][i],
+                diff_label[i],
+                music['level'][i],
+            )
+            for i in music.diff
+        )
     return result
 
 @sv.on_prefix('定数查歌')
@@ -67,9 +74,7 @@ async def search_dx_song_level(bot, ev:CQEvent):
         result = song_level(float(args[0]), float(args[1]))
     if len(result) > 50:
         await bot.finish(ev, f'结果过多（{len(result)} 条），请缩小搜索范围', at_sender=True)
-    msg = ''
-    for i in result:
-        msg += f'{i[0]}. {i[1]} {i[3]} {i[4]}({i[2]})\n'
+    msg = ''.join(f'{i[0]}. {i[1]} {i[3]} {i[4]}({i[2]})\n' for i in result)
     await bot.finish(ev, msg.strip(), at_sender=True)
 
 @sv.on_rex(r'^随个((?:dx|sd|标准))?([绿黄红紫白]?)([0-9]+\+?)')
@@ -79,7 +84,7 @@ async def random_song(bot, ev:CQEvent):
         diff = match.group(1)
         if diff == 'dx':
             tp = ['DX']
-        elif diff == 'sd' or diff == '标准':
+        elif diff in ['sd', '标准']:
             tp = ['SD']
         else:
             tp = ['SD', 'DX']
@@ -109,9 +114,10 @@ async def search_song(bot, ev:CQEvent):
     if len(result) == 0:
         await bot.send(ev, '没有找到这样的乐曲。', at_sender=True)
     elif len(result) < 50:
-        search_result = ''
-        for music in sorted(result, key=lambda i: int(i['id'])):
-            search_result += f'{music["id"]}. {music["title"]}\n'
+        search_result = ''.join(
+            f'{music["id"]}. {music["title"]}\n'
+            for music in sorted(result, key=lambda i: int(i['id']))
+        )
         await bot.send(ev, search_result.strip(), at_sender=True)
     else:
         await bot.send(ev, f'结果过多（{len(result)} 条），请缩小查询范围。', at_sender=True)
@@ -119,8 +125,8 @@ async def search_song(bot, ev:CQEvent):
 @sv.on_rex(r'^([绿黄红紫白]?)id ([0-9]+)')
 async def query_chart(bot, ev:CQEvent):
     match = ev['match']
-    level_labels = ['绿', '黄', '红', '紫', '白']
     if match.group(1) != '':
+        level_labels = ['绿', '黄', '红', '紫', '白']
         try:
             level_index = level_labels.index(match.group(1))
             level_name = ['Basic', 'Advanced', 'Expert', 'Master', 'Re: MASTER']
@@ -175,7 +181,7 @@ async def day_mai(bot, ev:CQEvent):
     h = hash(uid)
     rp = h % 100
     wm_value = []
-    for i in range(11):
+    for _ in range(11):
         wm_value.append(h & 3)
         h >>= 2
     msg = f'\n今日人品值：{rp}\n'
@@ -190,9 +196,8 @@ async def day_mai(bot, ev:CQEvent):
     await bot.send(ev, msg, at_sender=True)
 
 music_aliases = defaultdict(list)
-f = open(os.path.join(static, 'aliases.csv'), 'r', encoding='utf-8')
-tmp = f.readlines()
-f.close()
+with open(os.path.join(static, 'aliases.csv'), 'r', encoding='utf-8') as f:
+    tmp = f.readlines()
 for t in tmp:
     arr = t.strip().split('\t')
     for i in range(len(arr)):
@@ -207,7 +212,7 @@ async def what_song(bot, ev:CQEvent):
     result = music_aliases[name]
     if len(result) == 1:
         music = total_list.by_title(result[0])
-        await bot.send(ev, '您要找的是不是：' + random_music(music), at_sender=True)
+        await bot.send(ev, f'您要找的是不是：{random_music(music)}', at_sender=True)
     else:
         msg = '\n'.join(result)
         await bot.send(ev, f'您要找的可能是以下歌曲中的其中一首：\n{msg}', at_sender=True)
@@ -233,8 +238,8 @@ BREAK\t5/12.5/25(外加200落)'''
             result = re.search(r'([绿黄红紫白])(id)?([0-9]+)', args[0])
             level_labels = ['绿', '黄', '红', '紫', '白']
             level_labels2 = ['Basic', 'Advanced', 'Expert', 'Master', 'Re:MASTER']
-            level_index = level_labels.index(result.group(1))
-            chart_id = result.group(3)
+            level_index = level_labels.index(result[1])
+            chart_id = result[3]
             line = float(args[1])
             music = total_list.by_id(chart_id)
             chart: Dict[Any] = music['charts'][level_index]
@@ -259,10 +264,7 @@ BREAK 50落(一共{brk}个)等价于 {(break_50_reduce / 100):.3f} 个 TAP GREAT
 @sv.on_prefix(['b40', 'B40'])
 async def best_40(bot, ev:CQEvent):
     args = ev.message.extract_plain_text().strip()
-    if not args:
-        payload = {'qq': str(ev.user_id)}
-    else:
-        payload = {'username': args}
+    payload = {'username': args} if args else {'qq': str(ev.user_id)}
     img, success = await generate(payload)
     if success == 400:
         await bot.send(ev, '未找到此玩家，请确保此玩家的用户名和查分器中的用户名相同。', at_sender=True)

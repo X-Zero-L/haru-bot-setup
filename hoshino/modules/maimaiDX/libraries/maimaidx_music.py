@@ -10,29 +10,20 @@ def cross(checker: List[Any], elem: Optional[Union[Any, List[Any]]], diff):
     diff_ret = []
     if not elem or elem is Ellipsis:
         return True, diff
-    if isinstance(elem, List):
-        for _j in (range(len(checker)) if diff is Ellipsis else diff):
-            if _j >= len(checker):
-                continue
-            __e = checker[_j]
+    for _j in (range(len(checker)) if diff is Ellipsis else diff):
+        if _j >= len(checker):
+            continue
+        __e = checker[_j]
+        if isinstance(elem, List):
             if __e in elem:
                 diff_ret.append(_j)
                 ret = True
-    elif isinstance(elem, Tuple):
-        for _j in (range(len(checker)) if diff is Ellipsis else diff):
-            if _j >= len(checker):
-                continue
-            __e = checker[_j]
+        elif isinstance(elem, Tuple):
             if elem[0] <= __e <= elem[1]:
                 diff_ret.append(_j)
                 ret = True
-    else:
-        for _j in (range(len(checker)) if diff is Ellipsis else diff):
-            if _j >= len(checker):
-                continue
-            __e = checker[_j]
-            if elem == __e:
-                return True, [_j]
+        elif elem == __e:
+            return True, [_j]
     return ret, diff_ret
 
 
@@ -98,16 +89,10 @@ class Music(Dict):
 
 class MusicList(List[Music]):
     def by_id(self, music_id: str) -> Optional[Music]:
-        for music in self:
-            if music.id == music_id:
-                return music
-        return None
+        return next((music for music in self if music.id == music_id), None)
 
     def by_title(self, music_title: str) -> Optional[Music]:
-        for music in self:
-            if music.title == music_title:
-                return music
-        return None
+        return next((music for music in self if music.title == music_title), None)
 
     def random(self):
         return random.choice(self)

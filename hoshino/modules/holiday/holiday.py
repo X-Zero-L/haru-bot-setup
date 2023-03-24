@@ -61,12 +61,12 @@ def get_week_day(day):
 @sv.on_fullmatch(["最近假期", "近期假期", "临近假期", "最近假日", "近期假日", "临近假日"])
 async def current_holiday(bot, ev: CQEvent):
     uid = ev['user_id']
-    if not uid in hoshino.config.SUPERUSERS:
+    if uid not in hoshino.config.SUPERUSERS:
         if not _flmt.check(uid):
             await bot.send(ev, f"┭┮﹏┭┮呜哇~频繁使用的话bot会宕机的...再等{_cd}秒吧", at_sender=True)
             return
         if not _nlmt.check(uid):
-            await bot.send(ev, f"避免重复使用导致刷屏，此消息已忽略")
+            await bot.send(ev, "避免重复使用导致刷屏，此消息已忽略")
             return
     for data in holiday_cache:
         info = holiday_cache[data]
@@ -87,12 +87,12 @@ async def year_holiday(bot, ev: CQEvent):
     false_holiday = 0
     holiday = 0
     msg = '今年剩余的假期有:\n'
-    if not uid in hoshino.config.SUPERUSERS:
+    if uid not in hoshino.config.SUPERUSERS:
         if not _flmt.check(uid):
             await bot.send(ev, f"┭┮﹏┭┮呜哇~频繁使用的话bot会宕机的...再等{_cd}秒吧", at_sender=True)
             return
         if not _nlmt.check(uid):
-            await bot.send(ev, f"避免重复使用导致刷屏，此消息已忽略")
+            await bot.send(ev, "避免重复使用导致刷屏，此消息已忽略")
             return
     for data in holiday_cache:
         info = holiday_cache[data]
@@ -100,19 +100,19 @@ async def year_holiday(bot, ev: CQEvent):
         timeStamp = time.mktime(timeArray)
         if info['holiday'] == True and today < timeStamp:
             day = datetime.strptime(info['date'], "%Y-%m-%d").weekday()
-            if day == 5 or day == 6:
+            if day in [5, 6]:
                 false_holiday = false_holiday + 1
             time_int = int((timeStamp - today)/86400)+ 1
             name = info['name']
             date = info['date']
-            msg = msg + f'{date}{name},还有{time_int}天' + '\n'
+            msg = f'{msg}{date}{name},还有{time_int}天' + '\n'
             holiday = holiday +1
         elif info['holiday'] == False and today < timeStamp:
             false_holiday = false_holiday + 1
     _flmt.start_cd(uid)
     _nlmt.increase(uid)
     real_holiday = holiday - false_holiday
-    msg = msg + f'共{holiday}天\n减去调休与周末后剩余假期为{real_holiday}天'
+    msg = f'{msg}共{holiday}天\n减去调休与周末后剩余假期为{real_holiday}天'
     await bot.send(ev, msg)
 
 
@@ -127,7 +127,7 @@ async def false_holiday(bot, ev: CQEvent):
             day = datetime.strptime(info['date'], "%Y-%m-%d").weekday()
             week = get_week_day(day)
             date = info['date']
-            msg = msg + f'{date},{week}' + '\n'
+            msg = f'{msg}{date},{week}' + '\n'
     await bot.send(ev, msg)
 
 
@@ -170,5 +170,5 @@ async def today_holiday(bot, ev: CQEvent):
         }
     }
 
-    await bot.send(ev, f"数据更新完成。可前往api查看最新数据。")
+    await bot.send(ev, "数据更新完成。可前往api查看最新数据。")
     await bot.send(ev, data)

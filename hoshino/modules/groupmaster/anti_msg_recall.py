@@ -24,6 +24,5 @@ async def anti_msg_recall(session: NoticeSession):
         nickname = data.get('sender', {}).get('nickname')
         name = cardname or nickname or uid
         msg = data.get('message')
-        msg = util.filt_message(Message(msg))
-        if msg:
+        if msg := util.filt_message(Message(msg)):
             await session.send(f'{name}({uid})撤回了：\n{msg}')

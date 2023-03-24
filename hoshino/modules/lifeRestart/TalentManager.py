@@ -8,8 +8,8 @@ class TalentManager:
     @staticmethod
     def load(config):
         TalentManager._talents: Dict[int, List[Talent]] = dict([(i, []) for i in range(TalentManager.grade_count)])
-        TalentManager.talentDict: Dict[int, Talent] = dict()
-        
+        TalentManager.talentDict: Dict[int, Talent] = {}
+
         for k in config.keys():
             t = Talent(config[k])
             TalentManager._talents[t.grade].append(t)
@@ -40,8 +40,7 @@ class TalentManager:
             if count > n:
                 counts[grade - 1] += count - n
                 count = n
-            for talent in self._rnd.sample(TalentManager._talents[grade], k=count):
-                yield talent
+            yield from self._rnd.sample(TalentManager._talents[grade], k=count)
 
     def updateTalentProp(self):
         self._base.property.total += sum(t.status for t in self.talents)

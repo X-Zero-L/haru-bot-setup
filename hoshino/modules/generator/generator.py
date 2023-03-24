@@ -51,8 +51,7 @@ _flmt = FreqLimiter(300)
 def load_config(path):
     try:
         with open(path,'r',encoding='utf8') as f:
-            config = json.load(f)
-            return config
+            return json.load(f)
     except:
         return {}
 
@@ -61,11 +60,8 @@ def measure(msg, font_size, img_width):
     l = len(msg)
     length = 0
     positions = []
-    while i < l :
-        if re.search(r'[0-9a-zA-Z]', msg[i]):
-            length += font_size // 2
-        else:
-            length += font_size
+    while i < l:
+        length += font_size // 2 if re.search(r'[0-9a-zA-Z]', msg[i]) else font_size
         if length >= img_width:
             positions.append(i)
             length = 0
@@ -78,16 +74,15 @@ def get_pic(qq):
     return requests.get(apiPath,timeout=20).content
 
 def get_name(qq):
-	url = 'http://r.qzone.qq.com/fcg-bin/cgi_get_portrait.fcg'
-	params = { 'uins': qq }
-	res = requests.get(url, params=params)
-	res.encoding = 'GBK'
-	data_match = re.search(r'\((?P<data>[^\(\)]*)\)', res.text)
-	if data_match:
-		j_str = data_match.group('data')
-		return json.loads(j_str)[qq][-2]
-	else:
-		return '富婆'
+    url = 'http://r.qzone.qq.com/fcg-bin/cgi_get_portrait.fcg'
+    params = { 'uins': qq }
+    res = requests.get(url, params=params)
+    res.encoding = 'GBK'
+    if data_match := re.search(r'\((?P<data>[^\(\)]*)\)', res.text):
+        j_str = data_match['data']
+        return json.loads(j_str)[qq][-2]
+    else:
+        return '富婆'
 
 @sv.on_prefix(('营销号'))
 async def yxh(bot, ev: CQEvent):
@@ -106,24 +101,23 @@ async def yxh(bot, ev: CQEvent):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
             await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, msg)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, msg)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, msg)
+        await bot.send(ev, msg)
 
 @sv.on_prefix(('狗屁不通'))
 async def gpbt(bot, ev: CQEvent):
@@ -154,24 +148,23 @@ async def gpbt(bot, ev: CQEvent):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
             await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    if recall_msg_set == 1:
+        recall_1 = await bot.send(ev, body)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, body)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, body)
+        await bot.send(ev, body)
 
 @sv.on_prefix(('记仇'))
 async def jc(bot, ev: CQEvent):
@@ -271,7 +264,7 @@ async def diary(bot, ev: CQEvent):
     for i in ev.message:
         if i.get('type', False) == 'at':
             name = get_name(i.data['qq'])
-    
+
     kw = ev.message.extract_plain_text().strip()
     time = datetime.datetime.now().strftime('%Y年%m月%d日')
     arr = kw.split('/')
@@ -280,10 +273,7 @@ async def diary(bot, ev: CQEvent):
         weather, content = arr
         weather = weather.split(' ')[-1]
     else:
-        weather = ''
-        if arr[0].split(' ') == 2:
-            weather = arr[0].split(' ')[-1]
-
+        weather = arr[0].split(' ')[-1] if arr[0].split(' ') == 2 else ''
     if not content:
         with open(os.path.join(os.path.dirname(__file__), 'diary_data.json'),'r',encoding='utf-8') as file:
             diaries = json.load(file)
@@ -295,7 +285,7 @@ async def diary(bot, ev: CQEvent):
                     for s in '你她':
                         content = content.replace(s, name)
                     break
-            
+
 
     image = Image.open(os.path.join(os.path.dirname(__file__),'diary.png'))
     img_width, img_height = image.size
@@ -308,7 +298,7 @@ async def diary(bot, ev: CQEvent):
         str_list.insert(pos,'\n')
     # 日期单独一行
     line = len(positions) + 2
-    content = f'{time}，{weather}\n' + "".join(str_list) 
+    content = f'{time}，{weather}\n' + "".join(str_list)
     line_h = font_size + 4
     # 创建Draw对象:
     image_text = Image.new('RGB', (img_width, line_h * line), (255, 255, 255))
@@ -319,5 +309,5 @@ async def diary(bot, ev: CQEvent):
     image_back = Image.new('RGB', (img_width, line_h * line + img_height), (255, 255, 255))
     image_back.paste(image, (0, 0))
     image_back.paste(image_text, (0, img_height))
-    
+
     await bot.send(ev, str(MessageSegment.image(pic2b64(image_back))))

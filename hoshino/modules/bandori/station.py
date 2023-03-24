@@ -98,77 +98,78 @@ async def query_room(bot, ev):
     if status == 'failure':
         sv1.logger.info('Api出错，请停用插件')
         await bot.finish(ev, '查询失败，请联系维护.', at_sender=True)
-    else:
-        res = resp['response']
-        if not res:
-            await bot.finish(ev, '目前没有等待中的房间，请稍后查询.', at_sender=True)
-        else:
+    elif res := resp['response']:
+        putline = []
+        if room := res[0]['number']:
             room = res[0]['number']
-            putline = []
-            if room:
-                room = res[0]['number']
-                raw_message = res[0]['raw_message']
-                room_type = res[0]['type']
-                if room_type == '25':
-                    room_type = '25w room'
-                elif room_type == '7':
-                    room_type = '7w room'
-                elif room_type == '12':
-                    room_type = '12w room'
-                elif room_type == '18':
-                    room_type = '18w room'
-                else:
-                    room_type = 'Free room'
-                time = datetime.fromtimestamp(res[0]['time'] / 1000).strftime("%Y-%m-%d %H:%M:%S")
-                user_id = res[0]['user_info']['user_id']
-                username = res[0]['user_info']['username']
-                name = res[0]['source_info']['name']
-                source_type = res[0]['source_info']['type']
-                putline.append('--房间信息--')
-                putline.append('房间号：{}'.format(room))
-                putline.append('房间类型：{}'.format(room_type))
-                putline.append('发布时间：{}'.format(time))
-                putline.append('发布用户：{}({})'.format(username, user_id))
-                putline.append('发布来源：{}({})'.format(name, source_type))
-                putline.append('房间说明：{}'.format(raw_message))
-            result = "\n".join(putline)
-            if forward_msg_exchange == 1:
-                data = {
-                    "type": "node",
-                    "data": {
-                        "name": f"{forward_msg_name}",
-                        "uin": f"{forward_msg_uid}",
-                        "content": result
-                    }
-                }                
-                if recall_msg_set == 1:
-                    recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
-                    notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-                    await asyncio.sleep(RECALL_MSG_TIME)
-
-                    await bot.delete_msg(message_id=recall['message_id'])
-                    await bot.delete_msg(message_id=notice['message_id'])
-                else:
-                    recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+            raw_message = res[0]['raw_message']
+            room_type = res[0]['type']
+            if room_type == '25':
+                room_type = '25w room'
+            elif room_type == '7':
+                room_type = '7w room'
+            elif room_type == '12':
+                room_type = '12w room'
+            elif room_type == '18':
+                room_type = '18w room'
             else:
-                if recall_msg_set == 1:
-                    recall_1 = await bot.send(ev, result)
-                    notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+                room_type = 'Free room'
+            time = datetime.fromtimestamp(res[0]['time'] / 1000).strftime("%Y-%m-%d %H:%M:%S")
+            username = res[0]['user_info']['username']
+            name = res[0]['source_info']['name']
+            source_type = res[0]['source_info']['type']
+            user_id = res[0]['user_info']['user_id']
+            putline.extend(
+                (
+                    '--房间信息--',
+                    f'房间号：{room}',
+                    f'房间类型：{room_type}',
+                    f'发布时间：{time}',
+                    f'发布用户：{username}({user_id})',
+                    f'发布来源：{name}({source_type})',
+                    f'房间说明：{raw_message}',
+                )
+            )
+        result = "\n".join(putline)
+        if forward_msg_exchange == 1:
+            data = {
+                "type": "node",
+                "data": {
+                    "name": f"{forward_msg_name}",
+                    "uin": f"{forward_msg_uid}",
+                    "content": result
+                }
+            }                
+            if recall_msg_set == 1:
+                recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+                notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-                    await asyncio.sleep(RECALL_MSG_TIME)
+                await asyncio.sleep(RECALL_MSG_TIME)
 
-                    await bot.delete_msg(message_id=recall_1['message_id'])
-                    await bot.delete_msg(message_id=notice['message_id'])
-                else:
-                    await bot.send(ev, result)
+                await bot.delete_msg(message_id=recall['message_id'])
+                await bot.delete_msg(message_id=notice['message_id'])
+            else:
+                recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+        elif recall_msg_set == 1:
+            recall_1 = await bot.send(ev, result)
+            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+            await asyncio.sleep(RECALL_MSG_TIME)
+
+            await bot.delete_msg(message_id=recall_1['message_id'])
+            await bot.delete_msg(message_id=notice['message_id'])
+        else:
+            await bot.send(ev, result)
+
+    else:
+        await bot.finish(ev, '目前没有等待中的房间，请稍后查询.', at_sender=True)
 
 @sv2.on_prefix('开启通知')
 async def add_group(bot, ev):
     if not priv.check_priv(ev, priv.ADMIN):
         await bot.finish(ev, '请联系群管理为本群开启车站通知.', at_sender=True)
     gid = str(ev.group_id)
-    if not gid in config['station_notice']:
+    if gid not in config['station_notice']:
         config['station_notice'][gid] = {"gid":gid, "notice_on":True}
     else:
         await bot.finish(ev, '本群已经开启车站通知了.', at_sender=True)
@@ -181,7 +182,7 @@ async def delete_group(bot, ev):
     if not priv.check_priv(ev, priv.ADMIN):
         await bot.finish(ev, '请联系群管理为本群关闭车站通知.', at_sender=True)
     gid = str(ev.group_id)
-    if not gid in config['station_notice']:
+    if gid not in config['station_notice']:
         await bot.finish(ev, '本群还没有开启车站通知.', at_sender=True)
     else:
         config['station_notice'][gid]['notice_on'] = False
@@ -197,52 +198,50 @@ async def query_schedule():
     status = resp['status']
     if status == 'failure':
         sv2.logger.info('Api出错，请停用插件')
-        warn = 'BandoriStation api出错，请停用插件'
-        await bot.send_private_msg(user_id=weihu, message=warn)
-    else:
-        res = resp['response']
-        if not res:
-            pass
-        else:
+        await bot.send_private_msg(user_id=weihu, message='BandoriStation api出错，请停用插件')
+    elif res := resp['response']:
+        putline = []
+        if room := res[0]['number']:
             room = res[0]['number']
-            putline = []
-            if room:
-                room = res[0]['number']
-                raw_message = res[0]['raw_message']
-                room_type = res[0]['type']
-                if room_type == '25':
-                    room_type = '25w room'
-                elif room_type == '7':
-                    room_type = '7w room'
-                elif room_type == '12':
-                    room_type = '12w room'
-                elif room_type == '18':
-                    room_type = '18w room'
+            raw_message = res[0]['raw_message']
+            room_type = res[0]['type']
+            if room_type == '25':
+                room_type = '25w room'
+            elif room_type == '7':
+                room_type = '7w room'
+            elif room_type == '12':
+                room_type = '12w room'
+            elif room_type == '18':
+                room_type = '18w room'
+            else:
+                room_type = 'Free room'
+            time = datetime.fromtimestamp(res[0]['time'] / 1000).strftime("%Y-%m-%d %H:%M:%S")
+            user_id = res[0]['user_info']['user_id']
+            username = res[0]['user_info']['username']
+            name = res[0]['source_info']['name']
+            source_type = res[0]['source_info']['type']
+            putline.extend(
+                (
+                    '--房间信息--',
+                    f'房间号：{room}',
+                    f'房间类型：{room_type}',
+                    f'发布时间：{time}',
+                    f'发布用户：{username}({user_id})',
+                    f'发布来源：{name}({source_type})',
+                    f'房间说明：{raw_message}',
+                )
+            )
+        msg = "\n".join(putline)
+        station_notice = copy.deepcopy(config['station_notice'])
+        for gid in station_notice:
+            gid = str(gid)
+            await asyncio.sleep(1.5)
+            if config['station_notice'][gid]['notice_on']:      
+                if recall_msg_set == 1:
+                    recall = await bot.send_group_msg(group_id=int(config['station_notice'][gid]['gid']), message=msg)
+                    await bot.send(f"将在{RECALL_MSG_TIME}s后将撤回消息")
+                    await asyncio.sleep(RECALL_MSG_TIME)
+                    await bot.delete_msg(message_id=recall['message_id'])
                 else:
-                    room_type = 'Free room'
-                time = datetime.fromtimestamp(res[0]['time'] / 1000).strftime("%Y-%m-%d %H:%M:%S")
-                user_id = res[0]['user_info']['user_id']
-                username = res[0]['user_info']['username']
-                name = res[0]['source_info']['name']
-                source_type = res[0]['source_info']['type']
-                putline.append('--房间信息--')
-                putline.append('房间号：{}'.format(room))
-                putline.append('房间类型：{}'.format(room_type))
-                putline.append('发布时间：{}'.format(time))
-                putline.append('发布用户：{}({})'.format(username, user_id))
-                putline.append('发布来源：{}({})'.format(name, source_type))
-                putline.append('房间说明：{}'.format(raw_message))
-            msg = "\n".join(putline)
-            station_notice = copy.deepcopy(config['station_notice'])
-            for gid in station_notice:
-                gid = str(gid)
+                    await bot.send_group_msg(group_id=int(config['station_notice'][gid]['gid']), message=msg)
                 await asyncio.sleep(1.5)
-                if config['station_notice'][gid]['notice_on']:      
-                    if recall_msg_set == 1:
-                        recall = await bot.send_group_msg(group_id=int(config['station_notice'][gid]['gid']), message=msg)
-                        await bot.send(f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                        await asyncio.sleep(RECALL_MSG_TIME)
-                        await bot.delete_msg(message_id=recall['message_id'])
-                    else:
-                        await bot.send_group_msg(group_id=int(config['station_notice'][gid]['gid']), message=msg)
-                    await asyncio.sleep(1.5)

@@ -37,23 +37,22 @@ async def orderInfo(bot, ev: CQEvent):
     if IDdata == -1:
         await bot.finish(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次再进行订阅")
     else:
+        gid = ev["group_id"]
         if len(IDdata) > 1:
-            gid = ev["group_id"]
             playerRecord = selectRecord(IDdata[0]["id"])  # 获取对局记录
             if jsonWriter(playerRecord, gid, IDdata[0]["id"]):
-                message = message + "查询到多条角色昵称呢~，若订阅不是您想订阅的昵称，请补全昵称后重试\n"
-                message = message + "昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
+                message += "查询到多条角色昵称呢~，若订阅不是您想订阅的昵称，请补全昵称后重试\n"
+                message = f"{message}昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
             else:
-                message = message + "该昵称在本群已被订阅，请不要重新订阅哦！"
-            await bot.send(ev, message)
+                message += "该昵称在本群已被订阅，请不要重新订阅哦！"
         else:
-            gid = ev["group_id"]
             playerRecord = selectRecord(IDdata[0]["id"]) #获取对局记录
             if jsonWriter(playerRecord,gid,IDdata[0]["id"]):
-                message = message + "昵称:" + str(IDdata[0]["nickname"])+" 的对局已订阅成功\n"
+                message = f"{message}昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
             else:
-                message = message + "该昵称在本群已被订阅，请不要重新订阅哦！"
-            await bot.send(ev, message)
+                message += "该昵称在本群已被订阅，请不要重新订阅哦！"
+
+        await bot.send(ev, message)
 
 @sv.on_prefix(("关闭雀魂订阅","取消雀魂订阅"))
 async def cancelOrder(bot,ev:CQEvent):
@@ -65,11 +64,11 @@ async def cancelOrder(bot,ev:CQEvent):
     IDdata = getID(nickname)
     if IDdata == -404:
         await bot.finish(ev, "获取牌谱屋的数据超时了呢，请稍后再试哦~")
-    datalist=[]
     if IDdata == -1:
         await bot.finish(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0,len(record)):
+        datalist=[]
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"]==record[i]["id"]:
                 message = message + IDdata[0]["nickname"]
                 record[i]["record_on"] = False
@@ -78,7 +77,7 @@ async def cancelOrder(bot,ev:CQEvent):
         if flag:
             with open(join(path, 'account.json'), 'w', encoding='utf-8') as fp:
                 json.dump(datalist, fp, indent=4)
-            await bot.send(ev,"昵称:"+ message +" 在本群的四麻订阅已成功关闭\n")
+            await bot.send(ev, f"昵称:{message}" + " 在本群的四麻订阅已成功关闭\n")
         else:
             await bot.finish(ev,"没有找到该昵称在本群的订阅记录哦，请检查后重试\n")
 
@@ -92,11 +91,11 @@ async def openOrder(bot,ev:CQEvent):
     if IDdata == -404:
         await bot.finish(ev, "获取牌谱屋的数据超时了呢，请稍后再试哦~")
     message = ""
-    datalist=[]
     if IDdata == -1:
         await bot.finish(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0,len(record)):
+        datalist=[]
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"]==record[i]["id"]:
                 message = message + IDdata[0]["nickname"]
                 record[i]["record_on"] = True
@@ -105,7 +104,7 @@ async def openOrder(bot,ev:CQEvent):
         if flag:
             with open(join(path, 'account.json'), 'w', encoding='utf-8') as fp:
                 json.dump(datalist, fp, indent=4)
-            await bot.send(ev,"昵称:"+ message +"在本群的四麻订阅已成功开启\n")
+            await bot.send(ev, f"昵称:{message}" + "在本群的四麻订阅已成功开启\n")
         else:
             await bot.send(ev,"没有找到该昵称在本群的订阅记录哦，请检查后重试\n")
 
@@ -113,7 +112,7 @@ async def openOrder(bot,ev:CQEvent):
 async def record_scheduled():
     bot = get_bot()
     record = localLoad()
-    for i in range(0,len(record)):
+    for i in range(len(record)):
         playerRecord = selectRecord(record[i]["id"])
         if playerRecord == -1:
             sv.logger.info("获取" + str(record[i]["id"]) + "的对局数据超时已自动跳过")
@@ -127,28 +126,25 @@ async def record_scheduled():
 @sv.on_fullmatch("雀魂订阅状态")
 async def orderSituation(bot,ev):
     gid = ev["group_id"]
-    datalist = []
     message = ""
     record = localLoad()
-    for i in range(0,len(record)):
-        if int(record[i]["gid"]) == int(gid):
-            datalist.append(record[i])
-    if datalist == []:
-        await bot.finish(ev,"本群还没有雀魂对局的订阅哦\n")
-    else:
-        message = message + "已查询到群"+str(gid)+"的订阅状态:\n"
-        for i in range(0,len(datalist)):
-            data = selectNickname(datalist[i]["id"])
-            sv.logger.info("正在获取"+str(datalist[i]["id"])+"的昵称信息")
+    if datalist := [
+        record[i]
+        for i in range(len(record))
+        if int(record[i]["gid"]) == int(gid)
+    ]:
+        message = f"{message}已查询到群{str(gid)}" + "的订阅状态:\n"
+        for item in datalist:
+            data = selectNickname(item["id"])
+            sv.logger.info("正在获取" + str(item["id"]) + "的昵称信息")
             if data == -1:
                 await bot.finish(ev, "获取昵称信息失败，请重试")
             else:
-                message = message + "昵称：" + selectNickname(datalist[i]["id"]) + "   "
-            if datalist[i]["record_on"]:
-                message = message + "开启\n"
-            else:
-                message = message + "关闭\n"
+                message = f"{message}昵称：" + selectNickname(item["id"]) + "   "
+            message = message + "开启\n" if item["record_on"] else message + "关闭\n"
         await bot.send(ev,message)
+    else:
+        await bot.finish(ev,"本群还没有雀魂对局的订阅哦\n")
 
 @sv.on_prefix("删除雀魂订阅")
 async def delInfo(bot,ev):
@@ -159,11 +155,11 @@ async def delInfo(bot,ev):
     IDdata = getID(nickname)
     if IDdata == -404:
         await bot.finish(ev, "获取牌谱屋的数据超时了呢，请稍后再试哦~")
-    datalist = []
     if IDdata == -1:
         await bot.finish(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0, len(record)):
+        datalist = []
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"] == record[i]["id"]:
                 flag = True
                 continue
@@ -184,23 +180,22 @@ async def orderTriInfo(bot, ev: CQEvent):
     if IDdata == -1:
         await bot.send(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次再进行订阅")
     else:
+        gid = ev["group_id"]
         if len(IDdata) > 1:
-            gid = ev["group_id"]
             playerRecord = selectTriRecord(IDdata[0]["id"])  # 获取对局记录
             if jsonTriWriter(playerRecord, gid, IDdata[0]["id"]):
-                message = message + "查询到多条角色昵称呢~，若订阅不是您想订阅的昵称，请补全昵称后重试\n"
-                message = message + "昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
+                message += "查询到多条角色昵称呢~，若订阅不是您想订阅的昵称，请补全昵称后重试\n"
+                message = f"{message}昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
             else:
-                message = message + "该昵称在本群已被订阅，请不要重新订阅哦！"
-            await bot.send(ev, message)
+                message += "该昵称在本群已被订阅，请不要重新订阅哦！"
         else:
-            gid = ev["group_id"]
             playerRecord = selectTriRecord(IDdata[0]["id"]) #获取对局记录
             if jsonTriWriter(playerRecord,gid,IDdata[0]["id"]):
-                message = message + "昵称:" + str(IDdata[0]["nickname"])+" 的对局已订阅成功\n"
+                message = f"{message}昵称:" + str(IDdata[0]["nickname"]) + " 的对局已订阅成功\n"
             else:
-                message = message + "该昵称在本群已被订阅，请不要重新订阅哦！"
-            await bot.send(ev, message)
+                message += "该昵称在本群已被订阅，请不要重新订阅哦！"
+
+        await bot.send(ev, message)
 
 @sv.on_prefix(("关闭三麻订阅","取消三麻订阅"))
 async def cancelTriOrder(bot,ev:CQEvent):
@@ -210,11 +205,11 @@ async def cancelTriOrder(bot,ev:CQEvent):
     record = localTriLoad()
     flag = False
     IDdata = getTriID(nickname)
-    datalist=[]
     if IDdata == -1:
         await bot.send(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0,len(record)):
+        datalist=[]
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"]==record[i]["id"]:
                 message = message + IDdata[0]["nickname"]
                 record[i]["record_on"] = False
@@ -223,7 +218,7 @@ async def cancelTriOrder(bot,ev:CQEvent):
         if flag:
             with open(join(path, 'tri_account.json'), 'w', encoding='utf-8') as fp:
                 json.dump(datalist, fp, indent=4)
-            await bot.send(ev,"昵称:"+ message +" 在本群的三麻订阅已成功关闭\n")
+            await bot.send(ev, f"昵称:{message}" + " 在本群的三麻订阅已成功关闭\n")
         else:
             await bot.send(ev,"没有找到该昵称在本群的订阅记录哦，请检查后重试\n")
 
@@ -235,11 +230,11 @@ async def openTriOrder(bot,ev:CQEvent):
     flag = False
     IDdata = getTriID(nickname)
     message = ""
-    datalist=[]
     if IDdata == -1:
         await bot.send(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0,len(record)):
+        datalist=[]
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"]==record[i]["id"]:
                 message = message + IDdata[0]["nickname"]
                 record[i]["record_on"] = True
@@ -248,7 +243,7 @@ async def openTriOrder(bot,ev:CQEvent):
         if flag:
             with open(join(path, 'tri_account.json'), 'w', encoding='utf-8') as fp:
                 json.dump(datalist, fp, indent=4)
-            await bot.send(ev,"昵称:"+ message +"在本群的三麻订阅已成功开启\n")
+            await bot.send(ev, f"昵称:{message}" + "在本群的三麻订阅已成功开启\n")
         else:
             await bot.send(ev,"没有找到该昵称在本群的订阅记录哦，请检查后重试\n")
 
@@ -256,7 +251,7 @@ async def openTriOrder(bot,ev:CQEvent):
 async def Trirecord_scheduled():
     bot = get_bot()
     record = localTriLoad()
-    for i in range(0,len(record)):
+    for i in range(len(record)):
         playerRecord = selectTriRecord(record[i]["id"])
         if playerRecord == -1:
             sv.logger.info("获取" + str(record[i]["id"]) + "的三麻对局数据超时已自动跳过")
@@ -270,28 +265,25 @@ async def Trirecord_scheduled():
 @sv.on_fullmatch("三麻订阅状态")
 async def orderSituation(bot,ev):
     gid = ev["group_id"]
-    datalist = []
     message = ""
     record = localTriLoad()
-    for i in range(0,len(record)):
-        if int(record[i]["gid"]) == int(gid):
-            datalist.append(record[i])
-    if datalist == []:
-        await bot.finish(ev,"本群还没有雀魂三麻对局的订阅哦\n")
-    else:
-        message = message + "已查询到群"+str(gid)+"的订阅状态:\n"
-        for i in range(0,len(datalist)):
-            data = selectTriNickname(datalist[i]["id"])
-            sv.logger.info("正在获取" + str(datalist[i]["id"]) + "的昵称信息")
+    if datalist := [
+        record[i]
+        for i in range(len(record))
+        if int(record[i]["gid"]) == int(gid)
+    ]:
+        message = f"{message}已查询到群{str(gid)}" + "的订阅状态:\n"
+        for item in datalist:
+            data = selectTriNickname(item["id"])
+            sv.logger.info("正在获取" + str(item["id"]) + "的昵称信息")
             if data == -1:
                 await bot.finish(ev, "获取昵称信息失败，请重试")
             else:
-                message = message + "昵称：" + selectTriNickname(datalist[i]["id"]) + "    "
-            if datalist[i]["record_on"]:
-                message = message + "开启\n"
-            else:
-                message = message + "关闭\n"
+                message = f"{message}昵称：" + selectTriNickname(item["id"]) + "    "
+            message = message + "开启\n" if item["record_on"] else message + "关闭\n"
         await bot.send(ev,message)
+    else:
+        await bot.finish(ev,"本群还没有雀魂三麻对局的订阅哦\n")
 
 @sv.on_prefix("删除三麻订阅")
 async def delTriInfo(bot,ev):
@@ -300,11 +292,11 @@ async def delTriInfo(bot,ev):
     record = localTriLoad()
     flag = False
     IDdata = getTriID(nickname)
-    datalist = []
     if IDdata == -1:
         await bot.send(ev, "没有查询到该角色在金之间以上的对局数据呢~\n请在金之间以上房间对局一次后重试")
     else:
-        for i in range(0, len(record)):
+        datalist = []
+        for i in range(len(record)):
             if int(record[i]["gid"]) == int(gid) and IDdata[0]["id"] == record[i]["id"]:
                 flag = True
                 continue

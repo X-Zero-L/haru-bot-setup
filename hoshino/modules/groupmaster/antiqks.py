@@ -16,7 +16,7 @@ async def qks_keyword(bot, ev):
 async def qks_rex(bot, ev):
     match = ev.match
     msg = f'骑空士爪巴远点\n{qksimg}'
-    res = 'http://'+match.group(0)
+    res = f'http://{match.group(0)}'
     async with aiohttp.TCPConnector(verify_ssl=False) as connector:
         async with aiohttp.request(
             'GET',
@@ -26,7 +26,6 @@ async def qks_rex(bot, ev):
         ) as resp:
             h = resp.headers
             s = resp.status
-    if s == 301 or s == 302:
-        if 'granbluefantasy.jp' in h['Location']:
-            await bot.send(ev, msg, at_sender=True)
-            await util.silence(ev, 60)
+    if s in [301, 302] and 'granbluefantasy.jp' in h['Location']:
+        await bot.send(ev, msg, at_sender=True)
+        await util.silence(ev, 60)

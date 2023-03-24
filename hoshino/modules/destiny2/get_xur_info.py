@@ -17,9 +17,7 @@ def getxur(html222):
   for html20 in imglist:
     imglist = re.findall(r'https\:\\\/\\\/api\.xiaoheihe\.cn\\\/wiki\\\/get\_article\_for\_app.+?id\=1085660', html20)
     for html22 in imglist:
-      html22 = html22.replace('\\','')
-      # print(html22)
-      return html22
+      return html22.replace('\\','')
 
 # 返回老九的源码
 def getxurHtml2(html22):
@@ -36,7 +34,13 @@ def getxurImg(html2):
     return url2
 
 def sethtml2():
-  html2 = str(getxurHtml2(str(getxur(str(getxurHtml("https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"))))))
-  return html2
+  return str(
+      getxurHtml2(
+          str(
+              getxur(
+                  str(
+                      getxurHtml(
+                          "https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"
+                      ))))))
 
 # print(getxurImg(sethtml2()))

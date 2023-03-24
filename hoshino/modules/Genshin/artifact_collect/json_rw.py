@@ -39,12 +39,8 @@ with open(USER_INFO_PATH,'r',encoding='UTF-8') as f:
 
 
 def init_user_info(uid:str):
-    if not (uid in user_info):
-        user_info[uid] = {}
-        user_info[uid]["stamina"] = 120
-        user_info[uid]["strengthen_points"] = 0
-        user_info[uid]["warehouse"] = []
-
+    if uid not in user_info:
+        user_info[uid] = {"stamina": 120, "strengthen_points": 0, "warehouse": []}
         save_user_info()
 
 def updata_uid_stamina():

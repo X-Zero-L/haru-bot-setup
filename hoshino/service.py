@@ -33,8 +33,7 @@ def _load_service_config(service_name):
         return {}  # config file not found, return default config.
     try:
         with open(config_file, encoding='utf8') as f:
-            config = json.load(f)
-            return config
+            return json.load(f)
     except Exception as e:
         hoshino.logger.exception(e)
         return {}
@@ -169,7 +168,7 @@ class Service:
         """
         gl = defaultdict(list)
         for sid in hoshino.get_self_ids():
-            sgl = set(g['group_id'] for g in await self.bot.get_group_list(self_id=sid))
+            sgl = {g['group_id'] for g in await self.bot.get_group_list(self_id=sid)}
             if self.enable_on_default:
                 sgl = sgl - self.disable_group
             else:
@@ -363,8 +362,7 @@ class Service:
                     await asyncio.sleep(interval_time)
                     msg = randomiser(msg) if randomiser else msg
                     await bot.send_group_msg(self_id=random.choice(selfids), group_id=gid, message=msg)
-                l = len(msgs)
-                if l:
+                if l := len(msgs):
                     self.logger.info(f"群{gid} 投递{TAG}成功 共{l}条消息")
             except Exception as e:
                 self.logger.error(f"群{gid} 投递{TAG}失败：{type(e)}")

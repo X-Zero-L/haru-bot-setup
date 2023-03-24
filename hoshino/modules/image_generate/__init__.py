@@ -94,21 +94,20 @@ async def switch_list(bot, ev):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
-            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)  
+            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, image_list)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, image_list)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, image_list)
+        await bot.send(ev, image_list)

@@ -100,13 +100,9 @@ class DrawBest(object):
         self.cover_dir = os.path.join(static, 'mai', 'cover')
         self.img = Image.open(os.path.join(self.pic_dir, 'UI_TTR_BG_Base_Plus.png')).convert('RGBA')
         self.ROWS_IMG = [2]
-        for i in range(6):
-            self.ROWS_IMG.append(116 + 96 * i)
-        self.COLOUMS_IMG = []
-        for i in range(6):
-            self.COLOUMS_IMG.append(2 + 172 * i)
-        for i in range(4):
-            self.COLOUMS_IMG.append(888 + 172 * i)
+        self.ROWS_IMG.extend(116 + 96 * i for i in range(6))
+        self.COLOUMS_IMG = [2 + 172 * i for i in range(6)]
+        self.COLOUMS_IMG.extend(888 + 172 * i for i in range(4))
         self.draw()
 
     def _Q2B(self, uchar):
@@ -116,15 +112,19 @@ class DrawBest(object):
             inside_code = 0x0020
         else:
             inside_code -= 0xfee0
-        if inside_code < 0x0020 or inside_code > 0x7e: #转完之后不是半角字符返回原来的字符
-            return uchar
-        return chr(inside_code)
+        return (
+            uchar
+            if inside_code < 0x0020 or inside_code > 0x7E
+            else chr(inside_code)
+        )
 
     def _stringQ2B(self, ustring):
         """把字符串全角转半角"""
         return "".join([self._Q2B(uchar) for uchar in ustring])
 
     def _getCharWidth(self, o) -> int:
+        if o in [0xE, 0xF]:
+            return 0
         widths = [
             (126, 1), (159, 0), (687, 1), (710, 0), (711, 1), (727, 0), (733, 1), (879, 0), (1154, 1), (1161, 0),
             (4347, 1), (4447, 2), (7467, 1), (7521, 0), (8369, 1), (8426, 0), (9000, 1), (9002, 2), (11021, 1),
@@ -132,18 +132,10 @@ class DrawBest(object):
             (64106, 2), (65039, 1), (65059, 0), (65131, 2), (65279, 1), (65376, 2), (65500, 1), (65510, 2),
             (120831, 1), (262141, 2), (1114109, 1),
         ]
-        if o == 0xe or o == 0xf:
-            return 0
-        for num, wid in widths:
-            if o <= num:
-                return wid
-        return 1
+        return next((wid for num, wid in widths if o <= num), 1)
 
     def _coloumWidth(self, s:str):
-        res = 0
-        for ch in s:
-            res += self._getCharWidth(ord(ch))
-        return res
+        return sum(self._getCharWidth(ord(ch)) for ch in s)
 
     def _changeColumnWidth(self, s:str, len:int) -> str:
         res = 0
@@ -201,7 +193,7 @@ class DrawBest(object):
         comboPic = ' FC FCp AP APp'.split(' ')
         imgDraw = ImageDraw.Draw(img)
         titleFontName = adobe
-        for num in range(0, len(sdBest)):
+        for num in range(len(sdBest)):
             i = num // 5
             j = num % 5
             chartInfo = sdBest[num]
@@ -219,7 +211,7 @@ class DrawBest(object):
             font = ImageFont.truetype(titleFontName, 16, encoding='utf-8')
             title = chartInfo.title
             if self._coloumWidth(title) > 15:
-                title = self._changeColumnWidth(title, 14) + '...'
+                title = f'{self._changeColumnWidth(title, 14)}...'
             tempDraw.text((8, 8), title, 'white', font)
             font = ImageFont.truetype(titleFontName, 14, encoding='utf-8')
 
@@ -243,12 +235,12 @@ class DrawBest(object):
         for num in range(len(sdBest), sdBest.size):
             i = num // 5
             j = num % 5
-            temp = Image.open(os.path.join(self.cover_dir, f'1000.png')).convert('RGB')
+            temp = Image.open(os.path.join(self.cover_dir, '1000.png')).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
             temp = temp.filter(ImageFilter.GaussianBlur(1))
             img.paste(temp, (self.COLOUMS_IMG[j] + 4, self.ROWS_IMG[i + 1] + 4))
-        for num in range(0, len(dxBest)):
+        for num in range(len(dxBest)):
             i = num // 3
             j = num % 3
             chartInfo = dxBest[num]
@@ -268,7 +260,7 @@ class DrawBest(object):
             font = ImageFont.truetype(titleFontName, 16, encoding='utf-8')
             title = chartInfo.title
             if self._coloumWidth(title) > 15:
-                title = self._changeColumnWidth(title, 14) + '...'
+                title = f'{self._changeColumnWidth(title, 14)}...'
             tempDraw.text((8, 8), title, 'white', font)
             font = ImageFont.truetype(titleFontName, 14, encoding='utf-8')
 
@@ -293,7 +285,7 @@ class DrawBest(object):
         for num in range(len(dxBest), dxBest.size):
             i = num // 3
             j = num % 3
-            temp = Image.open(os.path.join(self.cover_dir, f'1000.png')).convert('RGB')
+            temp = Image.open(os.path.join(self.cover_dir, '1000.png')).convert('RGB')
             temp = self._resizePic(temp, itemW / temp.size[0])
             temp = temp.crop((0, (temp.size[1] - itemH) / 2, itemW, (temp.size[1] + itemH) / 2))
             temp = temp.filter(ImageFilter.GaussianBlur(1))

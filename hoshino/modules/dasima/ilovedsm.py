@@ -41,7 +41,7 @@ async def bangzhu_dasima(bot, ev):
 async def dsmpowerup(bot, ev: CQEvent):
     uid = ev['user_id']
     _nlmt.reset(uid)
-    await bot.send(ev, f"好耶!")
+    await bot.send(ev, "好耶!")
 
 @sv.on_fullmatch(('发病', '大司马'))
 async def dsmmylove(bot, ev):

@@ -13,7 +13,7 @@ pixiv_tran = util.get_json('pixiv_tran.json')
 
 
 def img_proxy(url):
-    return config.setting.proxy_img_service + 'https://i.pixiv.cat%s' % urlparse(url).path
+    return f'{config.setting.proxy_img_service}https://i.pixiv.cat{urlparse(url).path}'
 
 
 def get_original_image(illust):
@@ -58,13 +58,12 @@ def download_illust_image(illust, retry=3):
     try:
         illust['local_img'] = download.get_img(url)
     except TimeoutError:
-        print('time out retry: %s' % retry)
-        if not --retry == 0:
+        print(f'time out retry: {retry}')
+        if --retry != 0:
             return download_illust_image(illust, retry)
-        else:
-            print('time error. url: %s' % url)
-            return illust
-    print('pixiv dl ok: %s' % url)
+        print(f'time error. url: {url}')
+        return illust
+    print(f'pixiv dl ok: {url}')
     return illust
 
 
@@ -115,18 +114,18 @@ class epixiv(ByPassSniApi):
                 print('登录p站失败了 请检查配置.')
                 return []
             res = self.search_illust(keyword)
-            if not res.search_span_limit:
-                print('查询出错 请检查账号问题')
-                return []
+        if not res.search_span_limit:
+            print('查询出错 请检查账号问题')
+            return []
 
         max_item_size = 30
         total_page = math.ceil(res.search_span_limit / max_item_size)
         workers = min(search_sort_num, total_page)
         pool = ThreadPoolExecutor(max_workers=workers)
-        futures = []
-        for i in range(workers):
-            futures.append(pool.submit(self.search_illust, keyword, offset=max_item_size * i))
-
+        futures = [
+            pool.submit(self.search_illust, keyword, offset=max_item_size * i)
+            for i in range(workers)
+        ]
         data = []
 
         for x in as_completed(futures):
@@ -139,18 +138,17 @@ class epixiv(ByPassSniApi):
         data = sorted(data, key=lambda item: item.total_view, reverse=True)
         sl = list(filter(lambda item: item.sanity_level == sanity_level, data))
 
-        while len(sl) < self.search_sanity_level_count and not sanity_level == 0:
+        while len(sl) < self.search_sanity_level_count and sanity_level != 0:
             sanity_level -= 2
             sl += list(filter(lambda item: item.sanity_level == sanity_level, data))
 
         data = sl
 
-        if not is_r18:
-            # data = filter(lambda item: item.x_restrict == 0, data)
-            data = filter(lambda item: not self.illust_is_r18(item), data)
-        else:
-            data = filter(lambda item: item.x_restrict == 1, data)
-
+        data = (
+            filter(lambda item: item.x_restrict == 1, data)
+            if is_r18
+            else filter(lambda item: not self.illust_is_r18(item), data)
+        )
         data = __proxy_illusts_img__(data)
 
         return data
@@ -158,23 +156,20 @@ class epixiv(ByPassSniApi):
     @staticmethod
     def download_illusts_img(illusts):
         pool = ThreadPoolExecutor(max_workers=len(illusts))
-        futures = []
-        for i in illusts:
-            futures.append(pool.submit(download_illust_image, util.dict_to_object(i)))
-
-        data = []
-
-        for x in as_completed(futures):
-            data.append(x.result())
+        futures = [
+            pool.submit(download_illust_image, util.dict_to_object(i))
+            for i in illusts
+        ]
+        data = [x.result() for x in as_completed(futures)]
         return sorted(data, key=lambda item: item.total_view, reverse=True)
 
     def auto_complete(self, keyword=None):
-        keyword = keyword if keyword else self.keyword
+        keyword = keyword or self.keyword
         if not keyword:
             return []
         data = []
 
-        url = 'https://jsonp.afeld.me/?url=https://www.pixiv.net/rpc/cps.php?keyword=%s&lang=zh' % parse.quote(keyword)
+        url = f'https://jsonp.afeld.me/?url=https://www.pixiv.net/rpc/cps.php?keyword={parse.quote(keyword)}&lang=zh'
         ac = util.dict_to_object(requests.get(url, headers={'referer': 'https://www.pixiv.net/'}, timeout=30).json())
         for word in ac.candidates:
             word = util.dict_to_object(word)
@@ -199,11 +194,11 @@ class epixiv(ByPassSniApi):
         return data[:config.rules.auto_complete_count]
 
     def get_tag_img(self, keyword=None):
-        keyword = keyword if keyword else self.keyword
+        keyword = keyword or self.keyword
         if not keyword:
             return None
 
-        url = 'https://jsonp.afeld.me/?url=https://www.pixiv.net/ajax/search/tags/%s' % parse.quote(keyword)
+        url = f'https://jsonp.afeld.me/?url=https://www.pixiv.net/ajax/search/tags/{parse.quote(keyword)}'
         tag = util.dict_to_object(requests.get(url, headers={'referer': 'https://www.pixiv.net/'}, timeout=30).json())
         if tag.error or isinstance(tag.body.pixpedia, list) or not tag.body.pixpedia.image:
             return None
@@ -246,18 +241,18 @@ class epixiv(ByPassSniApi):
                 print('登录p站失败了 请检查配置.')
                 return []
             info = self.illust_related(illust_id)
-            if info.error:
-                print(info.error.user_message)
-                return []
+        if info.error:
+            print(info.error.user_message)
+            return []
 
         illusts = sorted(info.illusts, key=lambda item: item.total_view, reverse=True)
 
         if can_r18:
             return __proxy_illusts_img__(illusts)
 
-        if not is_r18:
-            illusts = filter(lambda item: not self.illust_is_r18(item), illusts)
-        else:
-            illusts = filter(lambda item: item.x_restrict == 1, illusts)
-
+        illusts = (
+            filter(lambda item: item.x_restrict == 1, illusts)
+            if is_r18
+            else filter(lambda item: not self.illust_is_r18(item), illusts)
+        )
         return __proxy_illusts_img__(illusts)

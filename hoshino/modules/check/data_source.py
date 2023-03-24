@@ -37,25 +37,32 @@ class Check():
 
     async def get_check_info(self):
         self.run_all_check()
-        putline = []
-        putline.append("--Performance--\n[Cpu] {}%\n[Memory] {}%\n[Disk] {}%\n[Boot time] {}\n--Network--\n[Send now] {}{}\n[Recv now] {}{}\n[Send all] {}GB\n[Recv all] {}GB\n[Packets sent] {}\n[Packets recv] {}\n[Packets lost] {}%".format(self.cpu_percent, self.memory_percent, self.disk_percent, self.boot_time, self.sent_now, self.unit_now, self.recv_now, self.unit_now, self.send, self.recv, self.packets_sent, self.packets_recv, self.packet_lost))        
+        putline = [
+            f"--Performance--\n[Cpu] {self.cpu_percent}%\n[Memory] {self.memory_percent}%\n[Disk] {self.disk_percent}%\n[Boot time] {self.boot_time}\n--Network--\n[Send now] {self.sent_now}{self.unit_now}\n[Recv now] {self.recv_now}{self.unit_now}\n[Send all] {self.send}GB\n[Recv all] {self.recv}GB\n[Packets sent] {self.packets_sent}\n[Packets recv] {self.packets_recv}\n[Packets lost] {self.packet_lost}%"
+        ]
         if self.process_name_list:
             putline.append("--Process--")
-            for name, status in zip(self.process_name_list, self.process_status_list):
-                putline.append("[{}] {}".format(name, status))      
+            putline.extend(
+                f"[{name}] {status}"
+                for name, status in zip(
+                    self.process_name_list, self.process_status_list
+                )
+            )
         if self.user_list:
             putline.append("--Users--")
-            for user in self.user_list:
-                putline.append("[{}] {}".format(user['name'], user['started']))       
+            putline.extend(
+                f"[{user['name']}] {user['started']}" for user in self.user_list
+            )
         return "\n".join(putline)
 
     async def get_check_easy(self, max_performance_percent=[92,92,92]):
         self.run_all_check()
-        putline = []
-        putline.append("当前服务器状态：\nCpu：{}%\n内存：{}%\n丢包率: {}%".format(self.cpu_percent, self.memory_percent, self.packet_lost))
+        putline = [
+            f"当前服务器状态：\nCpu：{self.cpu_percent}%\n内存：{self.memory_percent}%\n丢包率: {self.packet_lost}%"
+        ]
         check_list = await self.get_check_simple()
         if sum(check_list) != 0:
-            hoshino.logger.error("System problem detected. check code: {}".format(check_list))
+            hoshino.logger.error(f"System problem detected. check code: {check_list}")
             if sum(check_list) == 5:
                 putline.append("※服务器已经安详地去了。")
             if sum(check_list) == 4:
@@ -111,10 +118,10 @@ class Check():
     def get_process_status(self, request_name_list: set):
         if not request_name_list:
             return None
-        
+
         self.process_name_list = []
         self.process_status_list = []
-        
+
         for p_n in request_name_list:
             p_l = self.get_sname_process_list(p_n)
             if len(p_l) == 1:
@@ -122,7 +129,7 @@ class Check():
                 self.process_status_list.append(p_l[0].status())
             else:
                 for i, p in enumerate(p_l):
-                    self.process_name_list.append(p_n+" ({})".format(i))
+                    self.process_name_list.append(f"{p_n} ({i})")
                     self.process_status_list.append(p.status())
 
     @staticmethod

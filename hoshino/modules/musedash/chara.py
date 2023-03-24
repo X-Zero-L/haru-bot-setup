@@ -29,13 +29,11 @@ class Roster:
             sname = values[0]  #下标0是字典的歌曲原名
             #hname = values[8]  #下标8是字典的查询名
             n = util.normalize_str(sname)
-  
-            if n not in self._roster:
-                    self._roster[n] = idx
-            else:
-                    logger.warning(f'MuseDash:chara: 出现重名{n}于id{idx}与id{self._roster[n]}')
-                    pass
 
+            if n not in self._roster:
+                self._roster[n] = idx
+            else:
+                logger.warning(f'MuseDash:chara: 出现重名{n}于id{idx}与id{self._roster[n]}')
         self._all_name_list = self._roster.keys()
 
     def get_id(self, name):

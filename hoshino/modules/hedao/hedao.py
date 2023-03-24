@@ -40,14 +40,10 @@ async def feedback(bot, ev: CQEvent):
         reply="醒醒！这两刀是打不死boss的\n"
         await bot.send(ev, reply)
         return
-    dd1=d1
-    dd2=d2
-    if d1>=rest:
-        dd1=rest
-    if d2>=rest:
-        dd2=rest        
-    res1=(1-(rest-dd1)/dd2)*90+10; # 1先出，2能得到的时间
-    res2=(1-(rest-dd2)/dd1)*90+10; # 2先出，1能得到的时间
+    dd1 = min(d1, rest)
+    dd2 = min(d2, rest)
+    res1=(1-(rest-dd1)/dd2)*90+10
+    res2=(1-(rest-dd2)/dd1)*90+10
     res1=round(res1,2)
     res2=round(res2,2)
     res1=min(res1,90)
@@ -55,12 +51,12 @@ async def feedback(bot, ev: CQEvent):
     res1=str(res1)
     res2=str(res2)
     reply=""
-    if(d1>=rest or d2>=rest):
-        reply=reply+"注：\n"
-        if(d1>=rest):
-            reply=reply+"第一刀可直接秒杀boss，伤害按 "+str(rest)+" 计算\n"
-        if(d2>=rest):
-            reply=reply+"第二刀可直接秒杀boss，伤害按 "+str(rest)+" 计算\n"
+    if (d1>=rest or d2>=rest):
+        reply += "注：\n"
+    if (d1>=rest):
+        reply = f"{reply}第一刀可直接秒杀boss，伤害按 {rest}" + " 计算\n"
+    if (d2>=rest):
+        reply = f"{reply}第二刀可直接秒杀boss，伤害按 {rest}" + " 计算\n"
     d1=str(d1)
     d2=str(d2)
     reply=reply+d1+"先出，另一刀可获得 "+res1+" 秒补偿刀\n"

@@ -45,10 +45,10 @@ async def init_birth(bot, ev):
         await bot.send(ev, msg)
         await create_yml(_bot, _current_dir)
         msg = '初始化成功，您可前往bot插件目录查看 `config.yml` 内容是否有误'  #数据结构非常简单，user_id是QQ号，yes_age是昨天的年龄，tod_age是今天的年龄
-        await bot.send(ev, msg)
     else:
         msg = '初始化失败，文件已存在不可再初始化！'  #为防止误触，不提供群内删除文件的命令，若想重新初始化，请手动到本文件目录删除`config.yml`
-        await bot.send(ev, msg)
+
+    await bot.send(ev, msg)
 
 # 推送生日祝福
 @sv.scheduled_job('cron', hour='8', minute='00') # 早上8点推送祝福，让你在赶着上班上学的同时得到一丝温馨感（
@@ -57,8 +57,7 @@ async def auto_compare():
     glist_info = await bot.get_group_list()
     for each_g in glist_info:
         gid = each_g['group_id']
-        bir_list = judge_bir(gid)
-        if bir_list:
+        if bir_list := judge_bir(gid):
             sv.logger.info(f'检测到今天群{gid}里有{len(bir_list)}个B生日！')
             msg = get_bir_info(bir_list)
             await bot.send_group_msg(group_id=gid, message=msg)

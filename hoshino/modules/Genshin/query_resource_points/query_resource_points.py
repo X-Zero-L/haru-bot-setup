@@ -235,7 +235,7 @@ class Resource_map(object):
 
         bio = BytesIO()
         self.map_image.save(bio, format='JPEG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
 
         return f"[CQ:image,file={base64_str}]"
 
@@ -249,7 +249,7 @@ def get_resource_map_mes(name):
     if data["date"] !=  time.strftime("%d"):
         up_label_and_point_list()
 
-    if not (name in data["can_query_type_list"]):
+    if name not in data["can_query_type_list"]:
         return f"没有 {name} 这种资源。\n发送 原神资源列表 查看所有资源名称"
 
     map = Resource_map(name)
@@ -269,13 +269,11 @@ def get_resource_map_mes(name):
 
 def get_resource_list_mes():
 
-    temp = {}
-
-    for id in data["all_resource_type"].keys():
-        # 先找1级目录
-        if data["all_resource_type"][id]["depth"] == 1:
-            temp[id] = []
-
+    temp = {
+        id: []
+        for id in data["all_resource_type"].keys()
+        if data["all_resource_type"][id]["depth"] == 1
+    }
     for id in data["all_resource_type"].keys():
         # 再找2级目录
         if data["all_resource_type"][id]["depth"] == 2:
@@ -283,14 +281,14 @@ def get_resource_list_mes():
 
     mes = "当前资源列表如下：\n"
 
-    for resource_type_id in temp.keys():
+    for resource_type_id, value in temp.items():
 
         if resource_type_id in ["1","12","50","51","95","131"]:
             # 在游戏里能查到的数据这里就不列举了，不然消息太长了
             continue
 
         mes += f"{data['all_resource_type'][resource_type_id]['name']}："
-        for resource_id in temp[resource_type_id]:
+        for resource_id in value:
             mes += f"{data['all_resource_type'][resource_id]['name']}，"
         mes += "\n"
 

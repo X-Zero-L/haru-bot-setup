@@ -79,8 +79,7 @@ def rand_string(n=8):
 async def enable_aichat(bot, ev: CQEvent):
     if not priv.check_priv(ev, priv.ADMIN):
         await bot.finish(ev, '请联系群管理调整AI概率哦~')
-    s = ev.message.extract_plain_text()
-    if s:
+    if s := ev.message.extract_plain_text():
         if s.isdigit() and 0<int(s)<51:
             chance = int(s)
         else:
@@ -96,11 +95,11 @@ async def disable_aichat(bot, ev: CQEvent):
     if not priv.check_priv(ev, priv.ADMIN):
         await bot.finish(ev, '请联系群管理关闭此功能哦~')
     ai_chance.delete_chance(str(ev.group_id))
-    await bot.send(ev, f'人工智障已禁用')
+    await bot.send(ev, '人工智障已禁用')
 
 
 def aichat(text):
-    cred = credential.Credential(SecretId, SecretKey) 
+    cred = credential.Credential(SecretId, SecretKey)
     httpProfile = HttpProfile()
     httpProfile.endpoint = "nlp.tencentcloudapi.com"
 
@@ -117,8 +116,7 @@ def aichat(text):
     resp = client.ChatBot(req)
     param = resp.to_json_string()
     reply = json.loads(param)
-    msg = reply['Reply']
-    return msg
+    return reply['Reply']
 
 @sv.on_message('group')
 async def ai_reply(bot, context):   
@@ -133,17 +131,15 @@ async def ai_reply(bot, context):
         except TencentCloudSDKException as err: 
             print(err) 
         return
-    if str(context.group_id) in ai_chance.chance:
-        if not random.randint(1,100) <= int(ai_chance.chance[str(context.group_id)]):
-            return
-        else:           
-            text = re.sub(cq_code_pattern, '', msg).strip()
-            if text == '':
-                return
-            try: 
-                msg = aichat(text)
-                await bot.send(context, msg,at_sender=False) 
-            except TencentCloudSDKException as err: 
-                print(err) 
-    else:
+    if str(context.group_id) not in ai_chance.chance:
         return
+    if random.randint(1, 100) > int(ai_chance.chance[str(context.group_id)]):
+        return
+    text = re.sub(cq_code_pattern, '', msg).strip()
+    if text == '':
+        return
+    try: 
+        msg = aichat(text)
+        await bot.send(context, msg,at_sender=False) 
+    except TencentCloudSDKException as err: 
+        print(err)

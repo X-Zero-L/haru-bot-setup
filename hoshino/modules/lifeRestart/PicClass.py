@@ -66,6 +66,5 @@ class ImgText:
             y += self.line_height * line_count
         bio  = BytesIO()
         im.save(bio, format='PNG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
-        mes  = f"[CQ:image,file={base64_str}]"
-        return mes
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
+        return f"[CQ:image,file={base64_str}]"

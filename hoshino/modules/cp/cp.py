@@ -46,12 +46,12 @@ async def entranceFunction(bot, ev):
     non = ev.message.extract_plain_text()
     s = non.split(' ')
     uid = ev['user_id']
-    if not uid in hoshino.config.SUPERUSERS:
+    if uid not in hoshino.config.SUPERUSERS:
         if not _flmt.check(uid):
             await bot.send(ev, f"┭┮﹏┭┮呜哇~频繁使用的话bot会宕机的...再等{_cd}秒吧", at_sender=True)
             return
         if not _nlmt.check(uid):
-            await bot.send(ev, f"避免重复使用导致刷屏，此消息已忽略")
+            await bot.send(ev, "避免重复使用导致刷屏，此消息已忽略")
             return
     if not non:
         await bot.send(ev, "要告诉我生成的对象名字哦！例如：[cp a b]")

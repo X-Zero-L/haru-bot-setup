@@ -33,7 +33,6 @@ db = util.init_db(config.cache_dir)
 
 
 @sv.on_message('group')  # 如果使用hoshino的分群管理取消注释这行 并注释下一行的 @_bot.on_message("group")
-# @_bot.on_message  # nonebot使用这
 async def main(*params):
     bot, ctx = (_bot, params[0]) if len(params) == 1 else params
     uid = ctx.user_id
@@ -42,12 +41,14 @@ async def main(*params):
     if isinstance(keyword, str):
         if not keyword:
 
-            info = db.get(uid, {})
-            if not info:
-                return await bot.send(ctx, '请在原有指令后面输入游戏uid,只需要输入一次就会记住下次直接使用%s获取就好' % config.comm.player_uid)
-            else:
+            if info := db.get(uid, {}):
                 keyword = info['uid']
 
+            else:
+                return await bot.send(
+                    ctx,
+                    f'请在原有指令后面输入游戏uid,只需要输入一次就会记住下次直接使用{config.comm.player_uid}获取就好',
+                )
         await bot.send(ctx, await get_stat(keyword))
         db[uid] = {'uid': keyword}
 
@@ -57,7 +58,7 @@ async def get_stat(uid):
         return '只能是数字ID啦'
     info = query.info(uid)
     if info.retcode != 0:
-        return '[%s]错误或者不存在 (%s)' % (uid, info.message)
+        return f'[{uid}]错误或者不存在 ({info.message})'
     stats = query.stats(info.data.stats, True)
     msg = 'UID: %s\n%s\n' % (uid, stats.string)
     for i in info.data.world_explorations:

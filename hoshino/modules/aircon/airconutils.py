@@ -86,9 +86,9 @@ def get_temp(N, n,setting, prev, T, power):
 
 def update_aircon(aircon):
 
+	now_temp = aircon["now_temp"]
+	last_update = aircon["last_update"]
 	if aircon["is_on"]:
-		now_temp = aircon["now_temp"]
-		last_update = aircon["last_update"]
 		volume = aircon["volume"]
 		set_temp = aircon["set_temp"]
 		power = powers[aircon["wind_rate"]]
@@ -104,18 +104,10 @@ def update_aircon(aircon):
 		elif ac_type == AIRCON_CENTRAL:
 			power = (volume // ac_central_unit_volume + 1) * ac_central_power
 			wind_rate = (volume // ac_central_unit_volume + 1) * ac_central_windrate
-		else: # should never reach here
-			pass
-
 		new_temp = get_temp(volume, wind_rate, set_temp, now_temp, t_delta, power)
-
-		aircon["now_temp"] = new_temp
-		aircon["last_update"] = new_update
 
 	else:
 		env_temp = aircon["env_temp"]
-		now_temp = aircon["now_temp"]
-		last_update = aircon["last_update"]
 		new_update = now_second()
 		timedelta = new_update - last_update
 
@@ -124,8 +116,9 @@ def update_aircon(aircon):
 		if (env_temp-now_temp)*(env_temp-new_temp)<0: #过头了
 			new_temp = env_temp
 
-		aircon["now_temp"] = new_temp
-		aircon["last_update"] = new_update
+
+	aircon["now_temp"] = new_temp
+	aircon["last_update"] = new_update
 
 def print_aircon(aircon):
 

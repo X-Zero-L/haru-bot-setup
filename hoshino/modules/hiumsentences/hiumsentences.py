@@ -32,12 +32,11 @@ def pic_gender_cqcode(dic_name):
     获得/res/img/dic_name目录下一张随机图片，返回cqcode
     '''
     pic_dir = R.img(dic_name).path
-    
+
     file_list:list = os.listdir(pic_dir)
     img_random = random.choice(file_list)
-    img_path = dic_name + '/' + img_random
-    img_cqcode = R.img(str(img_path)).cqcode
-    return img_cqcode
+    img_path = f'{dic_name}/{img_random}'
+    return R.img(str(img_path)).cqcode
 
 @sv.on_keyword(('上号','生而为人','生不出人','网抑云','已黑化','到点了'))
 async def net_ease_cloud_word(bot,ev:CQEvent):
@@ -54,6 +53,6 @@ async def net_ease_cloud_word(bot,ev:CQEvent):
         await bot.send(ev, pics)
     else:
         await bot.send(ev, R.img(f"wcloud/failed/nowc{random.randint(1, 7)}.jpg").cqcode)
-        await bot.send(ev, f'上号失败，不准抑郁')
+        await bot.send(ev, '上号失败，不准抑郁')
 
     

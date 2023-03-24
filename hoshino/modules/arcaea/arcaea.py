@@ -31,9 +31,8 @@ sv = Service(
 async def bangzhu_arcaea(bot, ev:CQEvent):
     await bot.send(ev, sv_help, at_sender=True)
 
-f = open('ds.txt', 'r', encoding='utf-8')
-dss = f.readlines()
-f.close()
+with open('ds.txt', 'r', encoding='utf-8') as f:
+    dss = f.readlines()
 
 
 @on_command('best', only_to_me=False)
@@ -54,7 +53,7 @@ async def _(session: CommandSession):
 
 @sv.on_command('arcaea', aliases=['arc'], only_to_me=False)
 async def arcaea(session: CommandSession):
-    await session.send("Querying %s" % session.state['id'])
+    await session.send(f"Querying {session.state['id']}")
     QueryThread(session.cmd, session.ctx, session.bot, session.state).start()
         
 

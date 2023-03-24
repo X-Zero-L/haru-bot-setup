@@ -42,7 +42,7 @@ epixiv = pixiv.epixiv(
 try:
     epixiv.auth(refresh_token=config.pixiv.refresh_token)
 except Exception as e:
-    print('登录p站失败了 请检查配置. %s' % e.body)
+    print(f'登录p站失败了 请检查配置. {e.body}')
 
 
 @sv.on_message('group')
@@ -50,23 +50,17 @@ async def epixiv_main(*params):
     bot, ctx = (_bot, params[0]) if len(params) == 1 else params
 
     msg = str(ctx['message']).strip()
-    # 搜索
-    keyword = util.get_msg_keyword(config.comm.get_image_header, msg, True)
-    if keyword:
+    if keyword := util.get_msg_keyword(
+        config.comm.get_image_header, msg, True
+    ):
         comm, footer = util.get_msg_keyword(config.comm.get_image_footer, keyword)
         keyword = await search(ctx, footer + comm)
         await ptag(ctx, keyword)
-    # 显示全部页面
-    keyword = util.get_msg_keyword(config.comm.show_meta_pages, msg, True)
-    if keyword:
+    if keyword := util.get_msg_keyword(config.comm.show_meta_pages, msg, True):
         await show_meta_pages(ctx, keyword)
-    # 相同口味
-    keyword = util.get_msg_keyword(config.comm.recommend, msg, True)
-    if keyword:
+    if keyword := util.get_msg_keyword(config.comm.recommend, msg, True):
         await recommend(ctx, keyword)
-    # ptag
-    keyword = util.get_msg_keyword(config.comm.ptag, msg, True)
-    if keyword:
+    if keyword := util.get_msg_keyword(config.comm.ptag, msg, True):
         await ptag(ctx, keyword)
 
 
@@ -104,7 +98,7 @@ async def search(ctx, keyword: str):
     ps = permission.user(uid, timeout=5 * 60)
 
     if ps.check() and uid not in admins:
-        await _bot.send(ctx, '正在处理啦 等一等哈  %s' % ps.msg())
+        await _bot.send(ctx, f'正在处理啦 等一等哈  {ps.msg()}')
         return ''
     ps.running('搜索中...')
     await _bot.send(ctx, '正在搜索 请稍等')
@@ -128,7 +122,7 @@ async def search(ctx, keyword: str):
         search_db.illusts = illusts
         db[db_key] = search_db
     else:
-        print('use cache len: %s' % len(illusts))
+        print(f'use cache len: {len(illusts)}')
 
     ps.running('下载图片中...')
     workers = rules.show_image_count
@@ -153,16 +147,18 @@ async def search(ctx, keyword: str):
 
 
 async def print_illusts(ctx, illusts):
+    show_image_comm = '此图有%s张, 使用下面的命令查看剩下的图\n全部图片#%s'
     for illust in illusts:
         image_urls = illust.image_urls
-        show_image_comm = '此图有%s张, 使用下面的命令查看剩下的图\n全部图片#%s'
         original = short_url.short(image_urls.original) if config.setting.short_url_enable else image_urls.original
         msg = {
             'title': illust.title,
             'id': illust.id,
-            'original': show_image_comm % (len(illust.meta_pages), illust.id) if illust.meta_pages else original,
-            'recommend': '相同口味#%s' % illust.id,
-            'img': MessageSegment.image(illust.local_img)
+            'original': show_image_comm % (len(illust.meta_pages), illust.id)
+            if illust.meta_pages
+            else original,
+            'recommend': f'相同口味#{illust.id}',
+            'img': MessageSegment.image(illust.local_img),
         }
         await _bot.send(ctx, config.str.print.format(**msg))
 
@@ -176,7 +172,7 @@ async def show_meta_pages(ctx, keyword: str):
     ps = permission.user(uid, timeout=5 * 60)
 
     if ps.check() and uid not in admins:
-        await _bot.send(ctx, '正在处理啦 等一等哈  %s' % ps.msg())
+        await _bot.send(ctx, f'正在处理啦 等一等哈  {ps.msg()}')
         return ''
     ps.running('查找中..')
     await _bot.send(ctx, '嗯嗯, 现在就去看看')
@@ -213,7 +209,7 @@ async def recommend(ctx, keyword: str):
     # can_r18 = is_group and rules.group_r18
     can_r18 = not is_group and rules.private_r18
     if ps.check() and uid not in admins:
-        await _bot.send(ctx, '正在处理啦 等一等哈  %s' % ps.msg())
+        await _bot.send(ctx, f'正在处理啦 等一等哈  {ps.msg()}')
         return ''
     await _bot.send(ctx, '现在就去做一份.')
 
@@ -243,14 +239,12 @@ async def recommend(ctx, keyword: str):
 
 async def ptag(ctx, keyword: str):
     keyword = keyword.strip()
-    # 关键字补全
-    ac = epixiv.auto_complete(keyword)
-    if ac:
+    if ac := epixiv.auto_complete(keyword):
         tag_info = epixiv.get_tag_img(ac[0]['text'])
         if not tag_info:
             await _bot.send(ctx, '没有搜索到标签信息呢')
             return
-        ac_str = '\n'.join(map(lambda x: '%s  %s' % (x['translation'], x['text']), ac))
+        ac_str = '\n'.join(map(lambda x: f"{x['translation']}  {x['text']}", ac))
         tag_info['local_img'] = MessageSegment.image(tag_info['local_img'])
         tag_info['ac'] = ac_str
         await _bot.send(ctx, config.str.auto_complete.format(**tag_info))

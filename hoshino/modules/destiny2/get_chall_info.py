@@ -17,9 +17,7 @@ def getchall(html333):
   for html30 in imglist:
     imglist = re.findall(r'https\:\\\/\\\/api\.xiaoheihe\.cn\\\/wiki\\\/get\_article\_for\_app.+?id\=1085660', html30)
     for html33 in imglist:
-      html33 = html33.replace('\\','')
-      # print(html33)
-      return html33
+      return html33.replace('\\','')
 
 # 返回试炼周报的源码
 def getchallHtml3(html33):
@@ -36,7 +34,13 @@ def getchallImg(html3):
     return url3
 
 def sethtml3():
-  html3 = str(getchallHtml3(str(getchall(str(getchallHtml("https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"))))))
-  return html3
+  return str(
+      getchallHtml3(
+          str(
+              getchall(
+                  str(
+                      getchallHtml(
+                          "https://api.xiaoheihe.cn/wiki/get_homepage_content/?wiki_id=1085660&verison=&is_share=1"
+                      ))))))
 
 # print(getchallImg(sethtml3()))

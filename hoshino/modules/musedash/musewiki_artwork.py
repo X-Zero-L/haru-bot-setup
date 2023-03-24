@@ -22,7 +22,7 @@ forward_msg_uid = '756160433'
 _cd = 300  #调用间隔冷却时间(s)  为避免被风控，建议调高
 _flmt = FreqLimiter(_cd)
 
-Wiki_Menu_Artwork_img = R.img(f"musewiki/etc/artwork.png").cqcode
+Wiki_Menu_Artwork_img = R.img("musewiki/etc/artwork.png").cqcode
 
 tips_tuple = _song_data.Muse_Tips
 
@@ -61,8 +61,7 @@ sv = Service(
 
 def get_voice_artwork_menu():
     filename = 'TroveBgm.wav'
-    voice_rec = R.get('record/musewiki/audioclip/', filename)
-    return voice_rec
+    return R.get('record/musewiki/audioclip/', filename)
 
 @sv.on_fullmatch(["帮助MuseDash百科-插图查询", "帮助百科插图查询"])
 async def bangzhu_musewiki_artwork(bot, ev) -> MessageSegment:
@@ -95,11 +94,11 @@ async def bangzhu_musewiki_artwork(bot, ev) -> MessageSegment:
         greetings = '✧(≖ ◡ ≖✿)深夜好！'
         await bot.send(ev, greetings + tips)
     if not _nlmt.check(uid):
-        await bot.send(ev, f"欢迎继续使用MuseDash百科-插图查询！")
+        await bot.send(ev, "欢迎继续使用MuseDash百科-插图查询！")
     else:
         await bot.send(ev, voice_rec)
     _nlmt.increase(uid)
-    
+
     final_output = Wiki_Menu_Artwork_img + sv_help
     await bot.send(ev, final_output)
 

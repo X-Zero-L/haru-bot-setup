@@ -22,7 +22,7 @@ def short(url: str):
         return url
 
     if setting.short_error and res[setting.short_error] == setting.short_error_value:
-        print('short url error: %s' % res.msg)
+        print(f'short url error: {res.msg}')
         return url
 
     return res[setting.short_json_str]

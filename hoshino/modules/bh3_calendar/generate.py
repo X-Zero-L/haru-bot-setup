@@ -10,23 +10,19 @@ from .draw import *
 def im2base64str(im):
     io = BytesIO()
     im.save(io, 'png')
-    base64_str = f"base64://{base64.b64encode(io.getvalue()).decode()}"
-    return base64_str
+    return f"base64://{base64.b64encode(io.getvalue()).decode()}"
 
 
 async def generate_day_schedule(server='cn'):
     events = await get_events(server, 0, 15)
 
-    has_prediction = False
-    for event in events:
-        if event['start_days'] > 0:
-            has_prediction = True
+    has_prediction = any(event['start_days'] > 0 for event in events)
     if has_prediction:
         im = create_image(len(events) + 2)
     else:
         im = create_image(len(events) + 1)
 
-    title = f'崩坏3日历'
+    title = '崩坏3日历'
     pcr_now = get_pcr_now(0)
     draw_title(im, 0, title, pcr_now.strftime('%Y/%m/%d'), '正在进行')
 

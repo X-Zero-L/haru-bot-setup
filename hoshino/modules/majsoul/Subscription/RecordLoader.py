@@ -26,54 +26,46 @@ def getURL(url):
 
 def getID(nickname):#获取牌谱屋角色ID
     nickname = urllib.parse.quote(nickname) #UrlEncode转换
-    url = baseurl + "/search_player/"+nickname+"?limit=9"
+    url = f"{baseurl}/search_player/{nickname}?limit=9"
     data = getURL(url)
     if isinstance(data,urllib.error.URLError):
         return -404
     datalist = json.loads(data)
-    if datalist == [] :
-        return -1
-    return datalist
+    return -1 if datalist == [] else datalist
 
 def getTriID(nickname):#获取牌谱屋角色ID
     nickname = urllib.parse.quote(nickname) #UrlEncode转换
-    url = tribaseurl + "/search_player/"+nickname+"?limit=9"
+    url = f"{tribaseurl}/search_player/{nickname}?limit=9"
     data = getURL(url)
     if isinstance(data,urllib.error.URLError):
         return -404
     datalist = json.loads(data)
-    if datalist == [] :
-        return -1
-    return datalist
+    return -1 if datalist == [] else datalist
 
 def selectRecord(id):
     localtime = time.time()
     urltime = str(int(localtime * 1000))  # 时间戳
 
-    basicurl = baseurl + "/player_stats/" + str(id) + "/1262304000000/" + urltime + "?mode=16.12.9.15.11.8"
+    basicurl = f"{baseurl}/player_stats/{str(id)}/1262304000000/{urltime}?mode=16.12.9.15.11.8"
     data = getURL(basicurl)
     if isinstance(data , urllib.error.URLError):
         return -1
     count = str(json.loads(data)["count"])
-    recordurl = baseurl + "/player_records/"+str(id)+"/"+urltime+"/1262304000000?limit=2&mode=16.12.9.15.11.8&descending=true&tag="+count
+    recordurl = f"{baseurl}/player_records/{str(id)}/{urltime}/1262304000000?limit=2&mode=16.12.9.15.11.8&descending=true&tag={count}"
     record = getURL(recordurl)
-    if isinstance(record , urllib.error.URLError):
-        return -1
-    return record
+    return -1 if isinstance(record , urllib.error.URLError) else record
 
 def selectTriRecord(id):
     localtime = time.time()
     urltime = str(int(localtime * 1000))  # 时间戳
-    basicurl = tribaseurl + "/player_stats/" + str(id) + "/1262304000000/" + urltime + "?mode=22.24.26.21.23.25"
+    basicurl = f"{tribaseurl}/player_stats/{str(id)}/1262304000000/{urltime}?mode=22.24.26.21.23.25"
     data = getURL(basicurl)
     if isinstance(data , urllib.error.URLError):
         return -1
     count = str(json.loads(data)["count"])
-    recordurl = tribaseurl + "/player_records/"+str(id)+"/"+urltime+"/1262304000000?limit=2&mode=22.24.26.21.23.25&descending=true&tag="+count
+    recordurl = f"{tribaseurl}/player_records/{str(id)}/{urltime}/1262304000000?limit=2&mode=22.24.26.21.23.25&descending=true&tag={count}"
     record = getURL(recordurl)
-    if isinstance(record , urllib.error.URLError):
-        return -1
-    return record
+    return -1 if isinstance(record , urllib.error.URLError) else record
 
 def localLoad():
     with open(join(path,'account.json'),encoding='utf-8') as fp:
@@ -90,7 +82,7 @@ def jsonWriter(Record,gid,id):
     localdata = localLoad()
     data = json.loads(Record)
     datalist = []
-    for i in range(0,len(localdata)):
+    for i in range(len(localdata)):
         if localdata[i]["gid"] == str(gid) and localdata[i]["id"] == id:
             return False
         datalist.append(localdata[i])
@@ -110,7 +102,7 @@ def jsonTriWriter(Record,gid,id):
     localdata = localTriLoad()
     data = json.loads(Record)
     datalist = []
-    for i in range(0,len(localdata)):
+    for i in range(len(localdata)):
         if localdata[i]["gid"] == str(gid) and localdata[i]["id"] == id:
             return False
         datalist.append(localdata[i])

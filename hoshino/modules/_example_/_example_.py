@@ -33,53 +33,51 @@ async def bangzhu_name(bot, ev):
 async def function_a(bot, ev: CQEvent):
     if not priv.check_priv(ev, priv.SUPERUSER):
         util.log(f"{ev.user_id}尝试, 已拒绝")
-        await bot.send(ev, f"权限不足。", at_sender=True)
-    else:
-        if forward_msg_exchange == 1:
-            data_all = []
-            msg1 = f'text1'
-            data1 = {
-                "type": "node",
-                "data": {
-                    "name": f"{forward_msg_name}",
-                    "uin": f"{forward_msg_uid}",
-                    "content": msg1
-                }
-            }
-            msg2 = f'text2'
-            data2 = {
-                "type": "node",
-                "data": {
-                    "name": f"{forward_msg_name}",
-                    "uin": f"{forward_msg_uid}",
-                    "content": msg2
-                }
-            }
-            data_all=[data1,data2]
-            if recall_msg_set == 1:
-                recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
-                notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
-                await asyncio.sleep(RECALL_MSG_TIME)
+        await bot.send(ev, "权限不足。", at_sender=True)
+    elif forward_msg_exchange == 1:
+        data_all = []
+        msg2 = 'text2'
+        msg1 = 'text1'
+        data1 = {
+            "type": "node",
+            "data": {
+                "name": f"{forward_msg_name}",
+                "uin": f"{forward_msg_uid}",
+                "content": msg1,
+            },
+        }
+        data2 = {
+            "type": "node",
+            "data": {
+                "name": f"{forward_msg_name}",
+                "uin": f"{forward_msg_uid}",
+                "content": msg2,
+            },
+        }
+        data_all=[data1,data2]
+        if recall_msg_set == 1:
+            recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
+            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-                await bot.delete_msg(message_id=recall['message_id'])
-                await bot.delete_msg(message_id=notice['message_id'])
-            else:
-                await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
+            await asyncio.sleep(RECALL_MSG_TIME)
+
+            await bot.delete_msg(message_id=recall['message_id'])
+            await bot.delete_msg(message_id=notice['message_id'])
         else:
-            if recall_msg_set == 1:
-                recall_1 = await bot.send(ev, f'text1')
-                recall_2 = await bot.send(ev, f'text2')
-                notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, 'text1')
+        recall_2 = await bot.send(ev, 'text2')
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
 
-                await asyncio.sleep(RECALL_MSG_TIME)
+        await asyncio.sleep(RECALL_MSG_TIME)
 
-                await bot.delete_msg(message_id=recall_1['message_id'])
-                await bot.delete_msg(message_id=recall_2['message_id'])
-                await bot.delete_msg(message_id=notice['message_id'])
-            else:
-                await bot.send(ev, f'text1')
-                await bot.send(ev, f'text2')
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=recall_2['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
+    else:
+        await bot.send(ev, 'text1')
+        await bot.send(ev, 'text2')
 
 
 HELP_DUEL_TEXT = '''

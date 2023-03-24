@@ -66,7 +66,7 @@ class BiliSearchSpider(BaseSpider):
             updates_all.extend([i for i in items if i.idx not in cls.idx_cache[gid] and i not in updates_all])
             items_all.extend(items)
         if updates_all:
-            cls.idx_cache[gid] = set(i.idx for i in items_all)
+            cls.idx_cache[gid] = {i.idx for i in items_all}
             cls.item_cache[gid] = items_all
         return updates_all
     
@@ -82,9 +82,7 @@ class BiliSearchSpider(BaseSpider):
     
     @classmethod
     def format_items(cls, items):
-        ret = [f'{cls.src_name}发现了新发布的视频:']
-        ret.extend([i.content for i in items]) 
-        return ret
+        return [f'{cls.src_name}发现了新发布的视频:', *[i.content for i in items]]
 
 
 def load_config():
@@ -120,7 +118,7 @@ async def spider_work(spider:BaseSpider, bot, gid, sv:Service, TAG):
     sv.logger.info(f'群{gid}的{TAG}检索到{len(updates)}个新视频！')
     msg_list = spider.format_items(updates)
     for i in range(len(updates)):
-        pic = MessageSegment.image('http:'+updates[i].pic)
+        pic = MessageSegment.image(f'http:{updates[i].pic}')
         msg = f'{msg_list[0]}{pic}{msg_list[i+1]}'
         await bot.send_group_msg(group_id=int(gid), message=msg)
 

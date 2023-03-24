@@ -60,14 +60,14 @@ def get_today_material(name:str):
     image = Image.open(os.path.join(FILE_PATH, "icon", png_name))
     bio = BytesIO()
     image.save(bio, format='PNG')
-    base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
+    base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
     return f"[CQ:image,file={base64_str}]"
 
 
 @sv.on_fullmatch('开启原神每日素材提醒')
 async def open_remind(bot , ev):
     gid = str(ev.group_id)
-    if not (gid in group_list):
+    if gid not in group_list:
         group_list.append(gid)
         save_group_list()
     await bot.send(ev, "每日提醒已开启，每天8点会发送今日素材")

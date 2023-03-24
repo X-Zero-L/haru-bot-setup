@@ -17,19 +17,13 @@ with open(os.path.join(FILE_PATH,'qiu_qiu_dictionary.json'),'r',encoding='UTF-8'
 
 def compare_words(word):
     # 比对word库是否有匹配的单词，有的话返回翻译，没有返回原词
-    if word in QIU_QIU_WORD:
-        return QIU_QIU_WORD[word]
-
-    return word
+    return QIU_QIU_WORD[word] if word in QIU_QIU_WORD else word
 
 def compare_phrase(phrase):
     # 比对phrase库是否有匹配的单词，有的话返回翻译，没有的话匹配word库，都没有返回原词
     if phrase in QIU_QIU_PHRASE:
         return QIU_QIU_PHRASE[phrase]
-    if phrase in QIU_QIU_WORD:
-        return QIU_QIU_WORD[phrase]
-
-    return phrase
+    return QIU_QIU_WORD[phrase] if phrase in QIU_QIU_WORD else phrase
 
 
 
@@ -44,7 +38,7 @@ def qiu_qiu_word_translation(txt:str):
 
         if tra_word == word:
             # 如果是原词表示没有翻译，前后加空格接回语句里
-            if not mes[-1] == " ":
+            if mes[-1] != " ":
                 mes += " "
             mes += tra_word
             mes += " "
@@ -68,11 +62,7 @@ def qiu_qiu_phrase_translation(phrase):
         if word == " ":
             continue
         tra_word = compare_phrase(word)
-        if tra_word == word:
-            mes += f"{word} : 没有这个词的翻译\n"
-        else:
-            mes += f"{word} : {tra_word}\n"
-
+        mes += f"{word} : 没有这个词的翻译\n" if tra_word == word else f"{word} : {tra_word}\n"
     return mes
 
 

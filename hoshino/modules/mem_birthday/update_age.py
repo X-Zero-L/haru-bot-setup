@@ -4,9 +4,8 @@ import yaml
 # 获取文件中的数据并删除旧版数据
 def get_tod(gid, uid):
     current_dir = os.path.join(os.path.dirname(__file__), 'config.yml')
-    file = open(current_dir, 'r', encoding="UTF-8")
-    file_data = file.read()
-    file.close()
+    with open(current_dir, 'r', encoding="UTF-8") as file:
+        file_data = file.read()
     config = yaml.load(file_data, Loader=yaml.FullLoader)
     for user in config['Info'][gid]:
         user_id = int(user['member']['user_id'])

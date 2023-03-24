@@ -178,12 +178,12 @@ sv = Service(
 
 @sv.on_prefix(('塔罗牌'))
 async def send_playerInfo(bot, ev):
-    await bot.send(ev,'请稍等，正在洗牌中')  
+    await bot.send(ev,'请稍等，正在洗牌中')
     indices =random.sample(range(1,78), 4)
     card_keys = list(cards.keys())
     shuffle(card_keys)
     for count in range(4):
-        sv.logger.info(f'第{count}轮')	
+        sv.logger.info(f'第{count}轮')
         index = int(indices[count])
         card_key = card_keys[index-1]
         meaning_key = list(meanings.keys())[count]
@@ -207,8 +207,17 @@ async def send_playerInfo(bot, ev):
         else:
             card_value = cards[card_key]
 
-        msg = []
-        msg.extend([meaning_key,"，",meaning_value,"\n",card_key,"，",card_value,"\n",f"[CQ:image,file={image_file}]"])
+        msg = [
+            meaning_key,
+            "，",
+            meaning_value,
+            "\n",
+            card_key,
+            "，",
+            card_value,
+            "\n",
+            f"[CQ:image,file={image_file}]",
+        ]
         sv.logger.info(msg)
         if count < 3:
             await bot.send(ev, "".join(msg), at_sender=True)

@@ -57,24 +57,23 @@ async def bangzhu_bilidynamic(bot, ev):
         if recall_msg_set == 1:
             recall = await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
             notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-                
+
             await asyncio.sleep(RECALL_MSG_TIME)
 
             await bot.delete_msg(message_id=recall['message_id'])
             await bot.delete_msg(message_id=notice['message_id'])
         else:
-            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)        
+            await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
+    elif recall_msg_set == 1:
+        recall_1 = await bot.send(ev, sv_help)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=recall_1['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            recall_1 = await bot.send(ev, sv_help)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=recall_1['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, sv_help)
+        await bot.send(ev, sv_help)
 
 common_GAME_UID_LIST = '''
 常用手游UID一览：
@@ -130,17 +129,16 @@ async def list_uid_game_bilipush(bot, ev):
         else:
             await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
 
+    elif recall_msg_set == 1:
+        msg = await bot.send(ev, common_GAME_UID_LIST)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=msg['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            msg = await bot.send(ev, common_GAME_UID_LIST)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=msg['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, common_GAME_UID_LIST)
+        await bot.send(ev, common_GAME_UID_LIST)
 
 @sv.on_fullmatch(["常用VTB/VUP一览"])
 async def list_uid_vup_bilipush(bot, ev):
@@ -166,17 +164,16 @@ async def list_uid_vup_bilipush(bot, ev):
         else:
             await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data)
 
+    elif recall_msg_set == 1:
+        msg = await bot.send(ev, common_VUP_UID_LIST)
+        notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
+
+        await asyncio.sleep(RECALL_MSG_TIME)
+
+        await bot.delete_msg(message_id=msg['message_id'])
+        await bot.delete_msg(message_id=notice['message_id'])
     else:
-        if recall_msg_set == 1:
-            msg = await bot.send(ev, common_VUP_UID_LIST)
-            notice = await bot.send(ev, f"将在{RECALL_MSG_TIME}s后将撤回消息")
-
-            await asyncio.sleep(RECALL_MSG_TIME)
-
-            await bot.delete_msg(message_id=msg['message_id'])
-            await bot.delete_msg(message_id=notice['message_id'])
-        else:
-            await bot.send(ev, common_VUP_UID_LIST)
+        await bot.send(ev, common_VUP_UID_LIST)
 
 async def broadcast(msg,groups=None,sv_name=None):
     bot = nonebot.get_bot()
@@ -186,7 +183,7 @@ async def broadcast(msg,groups=None,sv_name=None):
         raise ValueError(f'不存在服务 {sv_name}')
     if sv_name:
         enable_groups = await svs[sv_name].get_enable_groups()
-        send_groups = enable_groups.keys() if not groups else groups
+        send_groups = groups or enable_groups.keys()
     else:
         send_groups = groups
     for gid in send_groups:
@@ -201,7 +198,7 @@ def getImageCqCode(path):
 
 def getLimitedMessage(originMsg):
     if messageLengthLimit>0 and len(originMsg)>messageLengthLimit:
-        return originMsg[0:messageLengthLimit]+'……'
+        return f'{originMsg[:messageLengthLimit]}……'
     else:
         return originMsg
 
@@ -226,7 +223,7 @@ async def loadConfig():
             room_states[uid] = False
     #生成16位LIVE_BUVID，好像随机生成没事
     list2 = []
-    for number in range(16):
+    for _ in range(16):
         str2 = str(random.randint(0, 9))
         list2.append(str2)
     b = "".join(list2)
@@ -254,11 +251,9 @@ async def check_uid_exsist(uid):
     try:
         resp = await aiorequests.get('http://api.bilibili.com/x/space/acc/info?mid={user_uid}'.format(user_uid=uid), headers=header, timeout=20)
         res = await resp.json()
-        if res['code']==0:
-            return True
-        return False
+        return res['code'] == 0
     except Exception as e:
-        sv.logger.info('B站用户检查发生错误 '+e)
+        sv.logger.info(f'B站用户检查发生错误 {e}')
         return False
 
 async def get_user_name(uid):
@@ -270,7 +265,7 @@ async def get_user_name(uid):
         res = await resp.json()
         return res['data']['name']
     except Exception as e:
-        sv.logger.info('B站用户名获取发生错误 '+e)
+        sv.logger.info(f'B站用户名获取发生错误 {e}')
         return False
 
 async def load_all_username():
@@ -287,11 +282,11 @@ async def subscribe_dynamic(bot, ev):
     if not text:
         await bot.send(ev, "请按照格式发送", at_sender=True)
         return
-    if not ' ' in text:#仅当前群组
+    if ' ' not in text:#仅当前群组
         if not await check_uid_exsist(text):
             await bot.send(ev, '订阅失败：用户不存在')
             return
-        if not text in push_uids:
+        if text not in push_uids:
             push_uids[text] = [str(ev.group_id)]
             room_states[text] = False
         else:
@@ -306,7 +301,7 @@ async def subscribe_dynamic(bot, ev):
         if not await check_uid_exsist(subUid):
             await bot.send(ev, '订阅失败：用户不存在')
             return
-        if not subUid in push_uids:
+        if subUid not in push_uids:
             push_uids[subUid] = [subGroup]
             room_states[subUid] = False
         else:
@@ -326,7 +321,7 @@ async def disubscribe_dynamic(bot, ev):
     if not text:
         await bot.send(ev, "请按照格式发送", at_sender=True)
         return
-    if not ' ' in text:#仅当前群组
+    if ' ' not in text:#仅当前群组
         sv.logger.info(text)
         sv.logger.info(push_uids.keys())
         if text in push_uids.keys():

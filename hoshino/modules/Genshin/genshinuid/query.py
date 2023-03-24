@@ -21,17 +21,14 @@ def __get_ds__():
     n = "h8w582wxwgqvahcdkpvdhbh2w9casgfl"
     i = str(int(time.time()))
     r = ''.join(random.sample(string.ascii_lowercase + string.digits, 6))
-    c = __md5__("salt=" + n + "&t=" + i + "&r=" + r)
-    return i + "," + r + "," + c
+    c = __md5__(f"salt={n}&t={i}&r={r}")
+    return f"{i},{r},{c}"
 
 
 def info(uid):
-    server = 'cn_gf01'
-    if uid[0] == "5":
-        server = 'cn_qd01'
-
+    server = 'cn_qd01' if uid[0] == "5" else 'cn_gf01'
     req = requests.get(
-        url="https://api-takumi.mihoyo.com/game_record/genshin/api/index?server=" + server + "&role_id=" + uid,
+        url=f"https://api-takumi.mihoyo.com/game_record/genshin/api/index?server={server}&role_id={uid}",
         headers={
             'Accept': 'application/json, text/plain, */*',
             'DS': __get_ds__(),
@@ -43,8 +40,8 @@ def info(uid):
             'Accept-Encoding': 'gzip, deflate',
             'Accept-Language': 'zh-CN,en-US;q=0.8',
             'X-Requested-With': 'com.mihoyo.hyperion',
-            'Cookie': config.cookie
-        }
+            'Cookie': config.cookie,
+        },
     )
 
     return util.dict_to_object(json.loads(req.text))
@@ -61,7 +58,7 @@ class stats:
 
     @property
     def active_day_str(self) -> str:
-        return '活跃天数: %s' % self.active_day
+        return f'活跃天数: {self.active_day}'
 
     @property
     def achievement(self) -> int:
@@ -69,7 +66,7 @@ class stats:
 
     @property
     def achievement_str(self) -> str:
-        return '成就达成数: %s' % self.achievement
+        return f'成就达成数: {self.achievement}'
 
     @property
     def anemoculus(self) -> int:
@@ -79,7 +76,7 @@ class stats:
     def anemoculus_str(self) -> str:
         if self.max_hide and self.anemoculus == 66:
             return ''
-        return '风神瞳: %s/66' % self.anemoculus
+        return f'风神瞳: {self.anemoculus}/66'
 
     @property
     def geoculus(self) -> int:
@@ -89,7 +86,7 @@ class stats:
     def geoculus_str(self) -> str:
         if self.max_hide and self.geoculus == 131:
             return ''
-        return '岩神瞳: %s/131' % self.geoculus
+        return f'岩神瞳: {self.geoculus}/131'
 
     @property
     def avatar(self) -> int:
@@ -97,7 +94,7 @@ class stats:
 
     @property
     def avatar_str(self) -> str:
-        return '获得角色数: %s' % self.avatar
+        return f'获得角色数: {self.avatar}'
 
     @property
     def way_point(self) -> int:
@@ -107,7 +104,7 @@ class stats:
     def way_point_str(self) -> str:
         if self.max_hide and self.way_point == 83:
             return ''
-        return '解锁传送点: %s/83' % self.way_point
+        return f'解锁传送点: {self.way_point}/83'
 
     @property
     def domain(self) -> int:
@@ -115,7 +112,7 @@ class stats:
 
     @property
     def domain_str(self) -> str:
-        return '解锁秘境: %s' % self.domain
+        return f'解锁秘境: {self.domain}'
 
     @property
     def spiral_abyss(self) -> str:
@@ -123,7 +120,7 @@ class stats:
 
     @property
     def spiral_abyss_str(self) -> str:
-        return '' if self.spiral_abyss == '-' else '当期深境螺旋: %s' % self.spiral_abyss
+        return '' if self.spiral_abyss == '-' else f'当期深境螺旋: {self.spiral_abyss}'
 
     @property
     def common_chest(self) -> int:
@@ -131,7 +128,7 @@ class stats:
 
     @property
     def common_chest_str(self) -> str:
-        return '普通宝箱: %s' % self.common_chest
+        return f'普通宝箱: {self.common_chest}'
 
     @property
     def exquisite_chest(self) -> int:
@@ -139,7 +136,7 @@ class stats:
 
     @property
     def exquisite_chest_str(self) -> str:
-        return '精致宝箱: %s' % self.exquisite_chest
+        return f'精致宝箱: {self.exquisite_chest}'
 
     @property
     def luxurious_chest(self) -> int:
@@ -147,7 +144,7 @@ class stats:
 
     @property
     def luxurious_chest_str(self) -> str:
-        return '华丽宝箱: %s' % self.luxurious_chest
+        return f'华丽宝箱: {self.luxurious_chest}'
 
     @property
     def precious_chest(self) -> int:
@@ -155,7 +152,7 @@ class stats:
 
     @property
     def precious_chest_str(self) -> str:
-        return '珍贵宝箱: %s' % self.precious_chest
+        return f'珍贵宝箱: {self.precious_chest}'
 
     @property
     def string(self):

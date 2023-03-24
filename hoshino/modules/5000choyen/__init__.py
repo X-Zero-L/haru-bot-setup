@@ -32,7 +32,7 @@ async def gen_5000_pic(bot, ev: CQEvent):
     gid = ev.group_id
     mid= ev.message_id
     if not lmt.check(uid):
-        await bot.send(ev, f'您今天已经使用过10次生成器了，休息一下明天再来吧~', at_sender=True)
+        await bot.send(ev, '您今天已经使用过10次生成器了，休息一下明天再来吧~', at_sender=True)
         return
     try:
         keyword = ev.message.extract_plain_text().strip()

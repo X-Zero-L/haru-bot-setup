@@ -34,7 +34,10 @@ class user:
 
     def check(self):
         # time.strftime('%d', time.localtime())
-        if self.info.create_time + self.timeout < time.time() and not self.timeout == 0:
+        if (
+            self.info.create_time + self.timeout < time.time()
+            and self.timeout != 0
+        ):
             self.done()
             return False
         return self.info.running

@@ -67,9 +67,8 @@ class ImgText:
             y += self.line_height * line_count
         bio  = BytesIO()
         im.save(bio, format='PNG')
-        base64_str = 'base64://' + base64.b64encode(bio.getvalue()).decode()
-        mes  = f"[CQ:image,file={base64_str}]"
-        return mes
+        base64_str = f'base64://{base64.b64encode(bio.getvalue()).decode()}'
+        return f"[CQ:image,file={base64_str}]"
 
 
 def updateData(record,gid,id):
@@ -77,7 +76,7 @@ def updateData(record,gid,id):
     data = json.loads(record)
     datalist = []
     message = ""
-    for i in range(0,len(localdata)):
+    for i in range(len(localdata)):
         if data[0]["uuid"] != localdata[i]["uuid"] and gid == localdata[i]["gid"] and localdata[i]["id"] == id:
             localdata[i]["uuid"] = data[0]["uuid"]
             localdata[i]["endTime"] = data[0]["endTime"]
@@ -93,7 +92,7 @@ def updateTriData(record,gid,id):
     data = json.loads(record)
     datalist = []
     message = ""
-    for i in range(0,len(localdata)):
+    for i in range(len(localdata)):
         if data[0]["uuid"] != localdata[i]["uuid"] and gid == localdata[i]["gid"] and localdata[i]["id"] == id:
             localdata[i]["uuid"] = data[0]["uuid"]
             localdata[i]["endTime"] = data[0]["endTime"]
@@ -107,23 +106,22 @@ def updateTriData(record,gid,id):
 def processdata(data,num):
     message = "本群侦测到新的对局："
     message = message + "\n牌谱ID：" + str(data[0]["uuid"]) + "\n"
-    for j in range(0, num):
+    for j in range(num):
         message = message + str(data[0]["players"][j]["nickname"]) + "(" + str(data[0]["players"][j]["score"]) + ")  "
     message = message + "\n"
-    message = message + "对局开始时间：" + str(convertTime(data[0]["startTime"])) + "  "
-    message = message + "对局结束时间：" + str(convertTime(data[0]["endTime"])) + "  \n"
+    message = f"{message}对局开始时间：" + str(convertTime(data[0]["startTime"])) + "  "
+    message = f"{message}对局结束时间：" + str(convertTime(data[0]["endTime"])) + "  \n"
     pic = ImgText(message)
     return pic.draw_text()
 
 def convertTime(datatime):
     timeArray = time.localtime(datatime)
-    Time = time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
-    return Time
+    return time.strftime("%Y-%m-%d %H:%M:%S", timeArray)
 
 def selectNickname(id):
     localtime = time.time()
     urltime = str(int(localtime * 1000))  # 时间戳
-    basicurl = baseurl + "/player_stats/" + str(id) + "/1262304000000/" + urltime + "?mode=16.12.9.15.11.8"
+    basicurl = f"{baseurl}/player_stats/{str(id)}/1262304000000/{urltime}?mode=16.12.9.15.11.8"
     data = getURL(basicurl)
     if isinstance(data,urllib.error.URLError):
         return -1
@@ -134,7 +132,7 @@ def selectNickname(id):
 def selectTriNickname(id):
     localtime = time.time()
     urltime = str(int(localtime * 1000))  # 时间戳
-    basicurl = tribaseurl + "/player_stats/" + str(id) + "/1262304000000/" + urltime + "?mode=22.24.26.21.23.25"
+    basicurl = f"{tribaseurl}/player_stats/{str(id)}/1262304000000/{urltime}?mode=22.24.26.21.23.25"
     data = getURL(basicurl)
     if isinstance(data,urllib.error.URLError):
         return -1

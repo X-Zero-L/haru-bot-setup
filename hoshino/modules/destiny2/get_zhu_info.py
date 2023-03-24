@@ -15,7 +15,9 @@ def getzhuImg(html4):
     return url4
 
 def sethtml4():
-  html4 = str(getzhuHtml("https://api.xiaoheihe.cn/wiki/get_article_for_app/?article_id=8829978&wiki_id=1085660&is_share=1"))
-  return html4
+  return str(
+      getzhuHtml(
+          "https://api.xiaoheihe.cn/wiki/get_article_for_app/?article_id=8829978&wiki_id=1085660&is_share=1"
+      ))
 
 # print(getzhuImg(sethtml4()))
